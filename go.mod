@@ -1,3 +1,3 @@
-module go-marathon-team-1
+module suft_sdk
 
 go 1.16
