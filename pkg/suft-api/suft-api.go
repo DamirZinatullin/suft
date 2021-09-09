@@ -1,4 +1,4 @@
-package httpclient
+package suft_api
 
 import (
 	"bytes"
