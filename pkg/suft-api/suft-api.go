@@ -5,15 +5,14 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"suft_sdk/models"
 	"time"
 )
 
 type ClientInterface interface {
 	GetAuthToken() error
 	Authorize() error
-	Schedules() ([]models.Schedule, error)
-	AddSchedule(models.Schedule) error
+	Schedules() ([]Schedule, error)
+	AddSchedule(Schedule) error
 	DetailSchedule(int) error
 	EditSchedule(int, map[string]string) error
 	UpdateSchedule(int, map[string]string) error
@@ -28,6 +27,21 @@ func NewSuftAPI(uri string) (*suftAPI, error) {
 	return &suftAPI{
 		uri: uri,
 	}, nil
+}
+
+type Employee struct {
+	//todo
+}
+
+type Period struct {
+
+	//todo
+}
+
+type Schedule struct {
+	author Employee
+	id     int
+	period Period
 }
 
 func (s *suftAPI) GetAuthToken() error {
