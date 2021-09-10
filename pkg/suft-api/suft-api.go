@@ -6,13 +6,14 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"suft_sdk/pkg/suft-api/schedule"
 )
 
 type ClientInterface interface {
 	GetAuthToken() error
 	Authorize() error
-	Schedules() ([]Schedule, error)
-	AddSchedule(Schedule) error
+	Schedules() ([]schedule.Schedule, error)
+	AddSchedule([]schedule.Schedule) error
 	DetailSchedule(int) error
 	EditSchedule(int, map[string]string) error
 	UpdateSchedule(int, map[string]string) error
@@ -29,20 +30,7 @@ func NewSuftAPI(uri string) (*suftAPI, error) {
 	}, nil
 }
 
-type Employee struct {
-	//todo
-}
 
-type Period struct {
-
-	//todo
-}
-
-type Schedule struct {
-	author Employee
-	id     int
-	period Period
-}
 
 func (s *suftAPI) GetAuthToken() error {
 	cli := &http.Client{
