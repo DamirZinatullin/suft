@@ -34,5 +34,5 @@ type Schedule struct {
 	author Employee
 	id     int
 	period Period
-	StatusCode int
+	StatusCode string
 }

@@ -21,7 +21,7 @@ var TimeLogger struct{
 	Id int
 	ImportedFrom string
 	ProjectId int
-	StatusCode int
+	StatusCode string
 	Task string
 	WorkKindId int
 }
