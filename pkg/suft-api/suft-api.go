@@ -14,8 +14,8 @@ const (
 	URI string = "https://dev.gnivc.ru/tools/suft/api/v1/"
 )
 
-type ClientInterface interface {
-	GetAuthToken() error
+type SuftAPI interface {
+	GetAuthTokens() error
 	Authorize() error
 	Schedules() ([]schedule.Schedule, error)
 	AddSchedule([]schedule.Schedule) error
@@ -23,6 +23,10 @@ type ClientInterface interface {
 	EditSchedule(int, map[string]string) error
 	UpdateSchedule(int, map[string]string) error
 	Logout() error
+	GetURN() string
+	GetMethod() string
+	GetAccessToken() string
+	GetRefreshToken() string
 }
 
 type suftAPI struct {
@@ -32,11 +36,27 @@ type suftAPI struct {
 	RefreshToken string
 }
 
-func NewSuftAPI() *suftAPI {
+func NewSuftAPI() SuftAPI {
 	return &suftAPI{}
 }
 
-func (s *suftAPI) GetAuthToken() error {
+func (s *suftAPI) GetURN() string {
+	return s.URN
+}
+
+func (s *suftAPI) GetMethod() string {
+	return s.Method
+}
+
+func (s *suftAPI) GetAccessToken() string {
+	return s.AccessToken
+}
+
+func (s *suftAPI) GetRefreshToken() string {
+	return s.RefreshToken
+}
+
+func (s *suftAPI) GetAuthTokens() error {
 	cli := &http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -76,3 +96,11 @@ func (s *suftAPI) GetAuthToken() error {
 
 	return nil
 }
+
+func (s *suftAPI) Authorize() error                            { return nil }
+func (s *suftAPI) Schedules() ([]schedule.Schedule, error)     { return nil, nil }
+func (s *suftAPI) AddSchedule([]schedule.Schedule) error       { return nil }
+func (s *suftAPI) DetailSchedule(int) error                    { return nil }
+func (s *suftAPI) EditSchedule(int, map[string]string) error   { return nil }
+func (s *suftAPI) UpdateSchedule(int, map[string]string) error { return nil }
+func (s *suftAPI) Logout() error                               { return nil }

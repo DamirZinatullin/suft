@@ -9,8 +9,8 @@ import (
 
 func TestGetAuthToken(t *testing.T) {
 	suftAPI := NewSuftAPI()
-	err := suftAPI.GetAuthToken()
-	fmt.Println(suftAPI.AccessToken)
-	fmt.Println(suftAPI.RefreshToken)
+	err := suftAPI.GetAuthTokens()
+	fmt.Println(suftAPI.GetAccessToken())
+	fmt.Println(suftAPI.GetRefreshToken())
 	require.NoError(t, err)
 }
