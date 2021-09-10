@@ -35,21 +35,6 @@ func NewSuftAPI() *suftAPI {
 	return &suftAPI{}
 }
 
-type Employee struct {
-	//todo
-}
-
-type Period struct {
-
-	//todo
-}
-
-type Schedule struct {
-	author Employee
-	id     int
-	period Period
-}
-
 func (s *suftAPI) GetAuthToken() error {
 	cli := &http.Client{
 		Timeout: 10 * time.Second,
