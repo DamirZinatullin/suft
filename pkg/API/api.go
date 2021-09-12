@@ -9,3 +9,26 @@ type API interface {
 	SubmitForApproveSchedule(schedule.Schedule) error
 	ApproveSchedule(id int) error
 }
+
+type SuftAPI struct {
+}
+
+func (s *SuftAPI) Schedules() ([]schedule.Schedule, error) {
+	panic("implement me")
+}
+
+func (s *SuftAPI) AddSchedule(schedule *schedule.Schedule) error {
+	panic("implement me")
+}
+
+func (s *SuftAPI) UpdateSchedule(schedule *schedule.Schedule) error {
+	panic("implement me")
+}
+
+func (s *SuftAPI) SubmitForApproveSchedule(schedule *schedule.Schedule) error {
+	panic("implement me")
+}
+
+func (s *SuftAPI) ApproveSchedule(id int) error {
+	panic("implement me")
+}
