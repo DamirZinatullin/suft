@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"os"
-	suft_api "suft_sdk/pkg/suft-api"
+	"suft_sdk/internal/http-client"
 
 	"github.com/urfave/cli"
 )
@@ -19,8 +19,8 @@ func main() {
 			Usage: "Получение авторизационных токенов",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
-				suftAPI := suft_api.NewSuftAPI()
-				err := suftAPI.GetAuthTokens()
+				suftAPI := http_client.NewHttpClient()
+				err := suftAPI.AuthTokens()
 				if err != nil {
 					return err
 				}

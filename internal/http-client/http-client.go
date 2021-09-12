@@ -1,4 +1,4 @@
-package suft_api
+package http_client
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"suft_sdk/pkg/suft-api/schedule"
+	"suft_sdk/internal/http-client/schedule"
 	"time"
 )
 
@@ -14,8 +14,8 @@ const (
 	URI string = "https://dev.gnivc.ru/tools/suft/api/v1/"
 )
 
-type SuftAPI interface {
-	GetAuthTokens() error
+type HttpClient interface {
+	AuthTokens() error
 	Authorize() error
 	Schedules() ([]schedule.Schedule, error)
 	AddSchedule([]schedule.Schedule) error
@@ -29,34 +29,34 @@ type SuftAPI interface {
 	GetRefreshToken() string
 }
 
-type suftAPI struct {
+type httpClient struct {
 	URN          string
 	Method       string
 	AccessToken  string
 	RefreshToken string
 }
 
-func NewSuftAPI() SuftAPI {
-	return &suftAPI{}
+func NewHttpClient() HttpClient {
+	return &httpClient{}
 }
 
-func (s *suftAPI) GetURN() string {
+func (s *httpClient) GetURN() string {
 	return s.URN
 }
 
-func (s *suftAPI) GetMethod() string {
+func (s *httpClient) GetMethod() string {
 	return s.Method
 }
 
-func (s *suftAPI) GetAccessToken() string {
+func (s *httpClient) GetAccessToken() string {
 	return s.AccessToken
 }
 
-func (s *suftAPI) GetRefreshToken() string {
+func (s *httpClient) GetRefreshToken() string {
 	return s.RefreshToken
 }
 
-func (s *suftAPI) GetAuthTokens() error {
+func (s *httpClient) AuthTokens() error {
 	cli := &http.Client{
 		Timeout: 10 * time.Second,
 	}
@@ -97,10 +97,10 @@ func (s *suftAPI) GetAuthTokens() error {
 	return nil
 }
 
-func (s *suftAPI) Authorize() error                            { return nil }
-func (s *suftAPI) Schedules() ([]schedule.Schedule, error)     { return nil, nil }
-func (s *suftAPI) AddSchedule([]schedule.Schedule) error       { return nil }
-func (s *suftAPI) DetailSchedule(int) error                    { return nil }
-func (s *suftAPI) EditSchedule(int, map[string]string) error   { return nil }
-func (s *suftAPI) UpdateSchedule(int, map[string]string) error { return nil }
-func (s *suftAPI) Logout() error                               { return nil }
+func (s *httpClient) Authorize() error                            { return nil }
+func (s *httpClient) Schedules() ([]schedule.Schedule, error)     { return nil, nil }
+func (s *httpClient) AddSchedule([]schedule.Schedule) error       { return nil }
+func (s *httpClient) DetailSchedule(int) error                    { return nil }
+func (s *httpClient) EditSchedule(int, map[string]string) error   { return nil }
+func (s *httpClient) UpdateSchedule(int, map[string]string) error { return nil }
+func (s *httpClient) Logout() error                               { return nil }
