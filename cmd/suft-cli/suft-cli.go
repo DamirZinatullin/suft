@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"suft_sdk/internal/http-client"
+
+	api "suft_sdk/pkg/API"
 
 	"github.com/urfave/cli"
 )
@@ -15,17 +17,52 @@ func main() {
 	Flags := []cli.Flag{}
 	app.Commands = []cli.Command{
 		{
-			Name:  "auth",
-			Usage: "Получение авторизационных токенов",
+			Name:  "schedules",
+			Usage: "Получение списка расписаний",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
-				suftAPI := http_client.NewHttpClient()
-				err := suftAPI.AuthTokens()
+				suftAPI := api.NewSuftAPI()
+				schedules, err := suftAPI.Schedules()
 				if err != nil {
-					return err
+					log.Fatal(err)
 				}
+				fmt.Println(schedules)
 				return nil
-			}},
+			},
+
+		},
+		{
+			Name: "add",
+			Usage: "Добавление расписания",
+			Flags: Flags,
+			Action: func(c *cli.Context) error {
+				return nil
+			},
+		},
+		{
+			Name: "update",
+			Usage: "Изменение расписания",
+			Flags: Flags,
+			Action: func(c *cli.Context) error {
+				return nil
+			},
+		},
+		{
+			Name: "submit",
+			Usage: "Отправка расписания на утвердение",
+			Flags: Flags,
+			Action: func(c *cli.Context) error {
+				return nil
+			},
+		},
+		{
+			Name: "approve",
+			Usage: "Утверждение расписания",
+			Flags: Flags,
+			Action: func(c *cli.Context) error {
+				return nil
+			},
+		},
 	}
 	err := app.Run(os.Args)
 	if err != nil {
