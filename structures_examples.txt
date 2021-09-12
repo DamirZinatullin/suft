@@ -1,0 +1,221 @@
+schedule
+curl -X GET "https://dev.gnivc.ru/tools/suft/api/v1/api/v1/schedules?page=1&size=5&creatorApprover=creator" -H "accept: */*"
+https://dev.gnivc.ru/tools/suft/api/v1/api/v1/schedules?page=1&size=5&creatorApprover=creator
+description
+[
+  {
+    "author": {
+      "email": "string",
+      "firstName": "string",
+      "id": 0,
+      "lastName": "string",
+      "middleName": "string"
+    },
+    "id": 0,
+    "period": {
+      "closeDate": "string",
+      "endDate": "string",
+      "id": 0,
+      "startDate": "string",
+      "weekNumber": 0
+    },
+    "statusCode": "string"
+  }
+]
+
+example
+[
+  {
+    "id": 32884,
+    "period": {
+      "id": 354,
+      "weekNumber": 8,
+      "startDate": "2021-02-15",
+      "endDate": "2021-02-21",
+      "closeDate": null
+    },
+    "author": {
+      "id": 1808,
+      "lastName": "Пользователь",
+      "firstName": "Админович",
+      "middleName": "Демо",
+      "email": "suft@gnivc.ru"
+    },
+    "statusCode": "УТВ"
+  },
+  {
+    "id": 32885,
+    "period": {
+      "id": 353,
+      "weekNumber": 7,
+      "startDate": "2021-02-08",
+      "endDate": "2021-02-14",
+      "closeDate": null
+    },
+    "author": {
+      "id": 1808,
+      "lastName": "Пользователь",
+      "firstName": "Админович",
+      "middleName": "Демо",
+      "email": "suft@gnivc.ru"
+    },
+    "statusCode": "НУ"
+  },
+  {
+    "id": 32904,
+    "period": {
+      "id": 374,
+      "weekNumber": 28,
+      "startDate": "2021-07-05",
+      "endDate": "2021-07-11",
+      "closeDate": null
+    },
+    "author": {
+      "id": 1808,
+      "lastName": "Пользователь",
+      "firstName": "Админович",
+      "middleName": "Демо",
+      "email": "suft@gnivc.ru"
+    },
+    "statusCode": "СЗ"
+  },
+  {
+    "id": 32907,
+    "period": {
+      "id": 376,
+      "weekNumber": 30,
+      "startDate": "2021-07-19",
+      "endDate": "2021-07-25",
+      "closeDate": null
+    },
+    "author": {
+      "id": 1808,
+      "lastName": "Пользователь",
+      "firstName": "Админович",
+      "middleName": "Демо",
+      "email": "suft@gnivc.ru"
+    },
+    "statusCode": "СЗ"
+  },
+  {
+    "id": 32909,
+    "period": {
+      "id": 377,
+      "weekNumber": 31,
+      "startDate": "2021-07-26",
+      "endDate": "2021-08-01",
+      "closeDate": null
+    },
+    "author": {
+      "id": 1808,
+      "lastName": "Пользователь",
+      "firstName": "Админович",
+      "middleName": "Демо",
+      "email": "suft@gnivc.ru"
+    },
+    "statusCode": "СЗ"
+  }
+]
+
+
+logging-time
+curl -X GET "https://dev.gnivc.ru/tools/suft/api/v1/api/v1/schedules/32907/logging-times?page=1&size=5" -H "accept: */*"
+https://dev.gnivc.ru/tools/suft/api/v1/api/v1/schedules/32907/logging-times?page=1&size=5
+description
+[
+  {
+    "adminEmployee": {
+      "email": "string",
+      "firstName": "string",
+      "id": 0,
+      "lastName": "string",
+      "middleName": "string"
+    },
+    "commentAdminEmployee": "string",
+    "commentEmployee": "string",
+    "day1Time": 0,
+    "day2Time": 0,
+    "day3Time": 0,
+    "day4Time": 0,
+    "day5Time": 0,
+    "day6Time": 0,
+    "day7Time": 0,
+    "id": 0,
+    "importedFrom": "string",
+    "projectId": 0,
+    "statusCode": "string",
+    "task": "string",
+    "workKindId": 0
+  }
+]
+
+
+example
+[
+  {
+    "id": 327701,
+    "projectId": null,
+    "task": "Epic_TEST-24_Раскрытие тайн",
+    "statusCode": "СЗ",
+    "workKindId": 30,
+    "importedFrom": "Jira",
+    "commentEmployee": "тест 1",
+    "commentAdminEmployee": null,
+    "adminEmployee": null,
+    "day1Time": null,
+    "day2Time": null,
+    "day3Time": null,
+    "day4Time": 2,
+    "day5Time": null,
+    "day6Time": null,
+    "day7Time": null
+  },
+  {
+    "id": 327702,
+    "projectId": 88455,
+    "task": "Подзадача_SUTAIMSUPF-440_Задача для демо",
+    "statusCode": "СЗ",
+    "workKindId": 23,
+    "importedFrom": "Jira",
+    "commentEmployee": "test",
+    "commentAdminEmployee": null,
+    "adminEmployee": {
+      "id": 3151,
+      "lastName": "А",
+      "firstName": null,
+      "middleName": "Стуленков",
+      "email": "a.stulenkov@softconsult.ru"
+    },
+    "day1Time": null,
+    "day2Time": null,
+    "day3Time": 1,
+    "day4Time": null,
+    "day5Time": 1,
+    "day6Time": null,
+    "day7Time": null
+  },
+  {
+    "id": 327703,
+    "projectId": 88455,
+    "task": "Подзадача_SUTAIMSUPF-440_Задача для демо",
+    "statusCode": "СЗ",
+    "workKindId": 22,
+    "importedFrom": "Jira",
+    "commentEmployee": "test 2",
+    "commentAdminEmployee": null,
+    "adminEmployee": {
+      "id": 3151,
+      "lastName": "А",
+      "firstName": null,
+      "middleName": "Стуленков",
+      "email": "a.stulenkov@softconsult.ru"
+    },
+    "day1Time": null,
+    "day2Time": null,
+    "day3Time": 2,
+    "day4Time": null,
+    "day5Time": null,
+    "day6Time": null,
+    "day7Time": null
+  }
+]
