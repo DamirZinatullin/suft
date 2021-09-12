@@ -21,6 +21,10 @@ func ReadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
+	if err = file.Close(); err != nil {
+		return nil, err
+	}
+
 	config := Config{}
 	if err = yaml.Unmarshal(data, &config); err != nil {
 		return nil, err
