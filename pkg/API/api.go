@@ -13,6 +13,10 @@ type API interface {
 type SuftAPI struct {
 }
 
+func NewSuftAPI() *SuftAPI {
+	return &SuftAPI{}
+}
+
 func (s *SuftAPI) Schedules() ([]schedule.Schedule, error) {
 	panic("implement me")
 }
