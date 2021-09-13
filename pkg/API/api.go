@@ -4,16 +4,16 @@ import "suft_sdk/internal/http-client/schedule"
 
 type API interface {
 	Schedules() ([]schedule.Schedule, error)
-	AddSchedule(schedule.Schedule) error
-	UpdateSchedule(schedule.Schedule) error
-	SubmitForApproveSchedule(schedule.Schedule) error
+	AddSchedule(*schedule.Schedule) error
+	UpdateSchedule(*schedule.Schedule) error
+	SubmitForApproveSchedule(*schedule.Schedule) error
 	ApproveSchedule(id int) error
 }
 
 type SuftAPI struct {
 }
 
-func NewSuftAPI() *SuftAPI {
+func NewSuftAPI() API {
 	return &SuftAPI{}
 }
 
