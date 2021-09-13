@@ -2,8 +2,10 @@ package http_client
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"suft_sdk/internal/http-client/schedule"
@@ -140,7 +142,21 @@ func (s *httpClient) Schedules() ([]schedule.Schedule, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("unable to get schedules")
 	}
-	return nil, nil
+
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("unable to read response body:", err)
+		return nil, err
+	}
+
+	schedules := make([]schedule.Schedule, 1)
+	err = json.Unmarshal(respB, &schedules)
+	if err != nil {
+		log.Println("unable to unmarshal response body:", err)
+		return nil, err
+	}
+
+	return schedules, nil
 }
 func (s *httpClient) AddSchedule([]schedule.Schedule) error       { return nil }
 func (s *httpClient) DetailSchedule(int) error                    { return nil }
