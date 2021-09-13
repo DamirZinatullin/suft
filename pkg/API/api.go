@@ -2,7 +2,13 @@ package api
 
 import "suft_sdk/internal/http-client/schedule"
 
+type Tokens struct {
+	AccessToken  string
+	RefreshToken string
+}
+
 type API interface {
+	GetTokens(email string, password string) (Tokens, error)
 	Schedules() ([]schedule.Schedule, error)
 	AddSchedule(*schedule.Schedule) error
 	UpdateSchedule(*schedule.Schedule) error
@@ -15,6 +21,9 @@ type SuftAPI struct {
 
 func NewSuftAPI() API {
 	return &SuftAPI{}
+}
+func (s *SuftAPI) GetTokens(email string, password string) (tokens Tokens, err error) {
+	panic("implement me")
 }
 
 func (s *SuftAPI) Schedules() ([]schedule.Schedule, error) {
