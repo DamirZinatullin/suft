@@ -17,7 +17,7 @@ func main() {
 	Flags := []cli.Flag{}
 	app.Commands = []cli.Command{
 		{
-			Name:  "schedules",
+			Name:  "schedules, s",
 			Usage: "Получение списка расписаний",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
@@ -32,7 +32,7 @@ func main() {
 
 		},
 		{
-			Name: "add",
+			Name: "add, a",
 			Usage: "Добавление расписания",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
@@ -40,7 +40,7 @@ func main() {
 			},
 		},
 		{
-			Name: "update",
+			Name: "update, u",
 			Usage: "Изменение расписания",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
@@ -48,7 +48,7 @@ func main() {
 			},
 		},
 		{
-			Name: "submit",
+			Name: "submit s",
 			Usage: "Отправка расписания на утвердение",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
@@ -56,7 +56,7 @@ func main() {
 			},
 		},
 		{
-			Name: "approve",
+			Name: "approve apr",
 			Usage: "Утверждение расписания",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
