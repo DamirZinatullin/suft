@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"suft_sdk/internal/http-client"
+	api "suft_sdk/pkg/API"
 
 	"github.com/urfave/cli"
 )
@@ -19,6 +20,8 @@ func main() {
 			Usage: "Получение авторизационных токенов",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
+				client := api.NewSuftAPI()
+				client.
 				suftAPI := http_client.NewHttpClient()
 				err := suftAPI.AuthTokens()
 				if err != nil {

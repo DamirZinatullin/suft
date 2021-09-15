@@ -36,3 +36,8 @@ type Schedule struct {
 	period Period
 	StatusCode string
 }
+
+type EditStatusSchedule struct {
+	id int `json:"-"`
+	statusCode string
+}
