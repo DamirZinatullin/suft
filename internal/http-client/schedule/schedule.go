@@ -13,28 +13,26 @@ type ScheduleInterface interface {
 }
 
 type Employee struct {
-	Email string
-	FirstName string
-	Id int
-	LastName string
-	MiddleName string
+	Email      string `json:"email"`
+	FirstName  string `json:"firstName"`
+	Id         int    `json:"id"`
+	LastName   string `json:"lastName"`
+	MiddleName string `json:"middleName"`
 }
-
 
 type Period struct {
-	CloseDate string
-	EndDate string
-	Id int
-	StartDate string
-	weekNumber int
+	CloseDate  string `json:"closeDate"`
+	EndDate    string `json:"endDate"`
+	Id         int    `json:"id"`
+	StartDate  string `json:"startDate"`
+	WeekNumber int    `json:"weekNumber"`
 }
 
-
 type Schedule struct {
-	author Employee
-	id     int
-	period Period
-	StatusCode string
+	Author     Employee `json:"author"`
+	Id         int      `json:"id"`
+	Period     Period   `json:"period"`
+	StatusCode string   `json:"statusCode"`
 }
 
 type EditStatusSchedule struct {

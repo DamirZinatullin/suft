@@ -2,8 +2,10 @@ package http_client
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"suft_sdk/internal/http-client/schedule"
@@ -11,7 +13,8 @@ import (
 )
 
 const (
-	URI string = "https://dev.gnivc.ru/tools/suft/api/v1/"
+	URI            string = "https://dev.gnivc.ru/tools/suft/api/v1/"
+	defaultTimeout        = 10 * time.Second
 )
 
 type HttpClient interface {
@@ -58,7 +61,7 @@ func (s *httpClient) GetRefreshToken() string {
 
 func (s *httpClient) AuthTokens() error {
 	cli := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: defaultTimeout,
 	}
 
 	reqBody := bytes.NewBuffer([]byte(`{"username":"demo@example.com","password":"demo"}`))
@@ -72,10 +75,12 @@ func (s *httpClient) AuthTokens() error {
 		return err
 	}
 	req.Header.Add("Auth-method", "Password")
-	req.Header.Add("Content-Type", "application/json; charset=UTF-8")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept-Charset", "UTF-8")
 
 	resp, err := cli.Do(req)
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
@@ -97,8 +102,62 @@ func (s *httpClient) AuthTokens() error {
 	return nil
 }
 
-func (s *httpClient) Authorize() error                            { return nil }
-func (s *httpClient) Schedules() ([]schedule.Schedule, error)     { return nil, nil }
+func (s *httpClient) Authorize() error { return nil }
+func (s *httpClient) Schedules() ([]schedule.Schedule, error) {
+	cli := &http.Client{
+		Timeout: defaultTimeout,
+	}
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprint(URI, "api/v1/schedules?page=1&size=5&creatorApprover=creator"),
+		nil,
+	)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept-Charset", "UTF-8")
+
+	cookie1 := &http.Cookie{
+		Name:  "Access-token",
+		Value: s.AccessToken,
+	}
+	cookie2 := &http.Cookie{
+		Name:  "Refresh-token",
+		Value: s.RefreshToken,
+	}
+	req.AddCookie(cookie1)
+	req.AddCookie(cookie2)
+
+	resp, err := cli.Do(req)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("unable to get schedules")
+	}
+
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("unable to read response body:", err)
+		return nil, err
+	}
+
+	schedules := make([]schedule.Schedule, 1)
+	err = json.Unmarshal(respB, &schedules)
+	if err != nil {
+		log.Println("unable to unmarshal response body:", err)
+		return nil, err
+	}
+
+	return schedules, nil
+}
 func (s *httpClient) AddSchedule([]schedule.Schedule) error       { return nil }
 func (s *httpClient) DetailSchedule(int) error                    { return nil }
 func (s *httpClient) EditSchedule(int, map[string]string) error   { return nil }
