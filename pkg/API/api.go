@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"suft_sdk/internal/auth"
 	"suft_sdk/internal/http-client/logging-time"
@@ -42,7 +41,7 @@ type client struct {
 func NewClient(email string, password string) (*client, error) {
 	token, err := auth.Authenticate(email, password)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get authentification tokens: %s", err)
+		return nil, err
 	}
 	return &client{
 		BaseURL:      BaseURL,

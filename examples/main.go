@@ -9,7 +9,7 @@ import (
 func main() {
 	client, err := api.NewClient("demo@example.com", "demo")
 	if err != nil {
-		log.Fatalln("error in client creating", err)
+		log.Fatalln(err)
 	}
-	fmt.Println(client.AccessToken, client.RefreshToken)
+	fmt.Printf("Access-token: %s \nRefresh-token: %s\n", client.AccessToken, client.RefreshToken)
 }
