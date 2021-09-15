@@ -18,12 +18,10 @@ type Options struct {
 	Size int `json:"size"`
 }
 
-
-
 type API interface {
 	Schedules(options *Options) ([]schedule.Schedule, error)
 	AddSchedule(periodId int) error
-	DetailSchedule(scheduleId int)error
+	DetailSchedule(scheduleId int) error
 	LoggingTimeList(scheduleId int, options *Options) error
 	AddLoggingTime(scheduleId int, loggingTime *logging_time.AddLoggingTime) error
 	DetailLoggingTime(scheduleId int, loggingTimeId int) error
@@ -37,7 +35,8 @@ type client struct {
 	BaseURL      string
 	AccessToken  string
 	RefreshToken string
-	HTTPClient   *http.Client
+	request      *http.Request
+	httpClient   *http.Client
 }
 
 func NewClient(email string, password string) (*client, error) {
@@ -49,13 +48,13 @@ func NewClient(email string, password string) (*client, error) {
 		BaseURL:      BaseURL,
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
-		HTTPClient: &http.Client{
+		request:      &http.Request{Header: map[string][]string{"Auth-method": []string{"password"},
+			"Content-type": []string{"application/json; charset=UTF-8"}}},
+		httpClient: &http.Client{
 			Timeout: time.Minute,
 		},
 	}, nil
 }
-
-
 
 func (c client) Schedules(options *Options) ([]schedule.Schedule, error) {
 	panic("implement me")
@@ -96,8 +95,3 @@ func (c client) SubmitForApproveSchedule(scheduleId int, loggingTimeId int, stat
 func (c client) ApproveSchedule(scheduleId int, loggingTimeId int, status *schedule.EditStatusSchedule) error {
 	panic("implement me")
 }
-
-
-
-
-
