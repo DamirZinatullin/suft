@@ -27,7 +27,6 @@ type LoggingTime struct {
 }
 
 type AddLoggingTime struct {
-	Id              int `json:"-"`
 	CommentEmployee string
 	Day1Time        int
 	Day2Time        int
@@ -42,7 +41,6 @@ type AddLoggingTime struct {
 }
 
 type EditLoggingTime struct {
-	Id              int `json:"-"`
 	CommentAdminEmployee string
 	CommentEmployee      string
 	Day1Time             int

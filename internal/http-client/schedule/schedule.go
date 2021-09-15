@@ -38,6 +38,5 @@ type Schedule struct {
 }
 
 type EditStatusSchedule struct {
-	id int `json:"-"`
 	statusCode string
 }
