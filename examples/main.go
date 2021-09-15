@@ -12,4 +12,8 @@ func main() {
 		log.Fatalln(err)
 	}
 	fmt.Printf("Access-token: %s \nRefresh-token: %s\n", client.AccessToken, client.RefreshToken)
+	schedules, err := client.Schedules(nil)
+	for _, schedule := range schedules{
+		fmt.Println(schedule)
+	}
 }
