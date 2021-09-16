@@ -27,7 +27,7 @@ type API interface {
 	Schedules(options *Options) ([]schedule.Schedule, error)
 	AddSchedule(periodId int) error
 	DetailSchedule(scheduleId int) error
-	LoggingTimeList(scheduleId int, options *Options) error
+	LoggingTimeList(scheduleId int, options *Options) ([]logging_time.LoggingTime, error)
 	AddLoggingTime(scheduleId int, loggingTime *logging_time.AddLoggingTime) error
 	DetailLoggingTime(scheduleId int, loggingTimeId int) error
 	EditLoggingTime(scheduleId int, loggingTimeId int, loggingTime *logging_time.EditLoggingTime)
@@ -44,7 +44,7 @@ type client struct {
 	httpClient   *http.Client
 }
 
-func NewClient(email string, password string) (*client, error) {
+func NewClient(email string, password string) (API, error) {
 	token, err := auth.Authenticate(email, password)
 	if err != nil {
 		return nil, err
@@ -117,7 +117,7 @@ func (c *client) DetailSchedule(scheduleId int) error {
 	panic("implement me")
 }
 
-func (c *client) LoggingTimeList(scheduleId int, options *Options) error {
+func (c *client) LoggingTimeList(scheduleId int, options *Options)([]logging_time.LoggingTime, error) {
 	panic("implement me")
 }
 
