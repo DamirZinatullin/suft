@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -53,7 +54,7 @@ func NewClient(email string, password string) (API, error) {
 		BaseURL:      BaseURL,
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
-		request:      &http.Request{Header: map[string][]string{"Auth-method": []string{"password"},
+		request: &http.Request{Header: map[string][]string{"Auth-method": []string{"password"},
 			"Content-type": []string{"application/json; charset=UTF-8"}}},
 		httpClient: &http.Client{
 			Timeout: time.Minute,
@@ -117,7 +118,7 @@ func (c *client) DetailSchedule(scheduleId int) error {
 	panic("implement me")
 }
 
-func (c *client) LoggingTimeList(scheduleId int, options *Options)([]logging_time.LoggingTime, error) {
+func (c *client) LoggingTimeList(scheduleId int, options *Options) ([]logging_time.LoggingTime, error) {
 	panic("implement me")
 }
 
@@ -143,4 +144,34 @@ func (c *client) SubmitForApproveSchedule(scheduleId int, loggingTimeId int, sta
 
 func (c *client) ApproveSchedule(scheduleId int, loggingTimeId int, status *schedule.EditStatusSchedule) error {
 	panic("implement me")
+}
+
+func (c *client) doHttp(httpMethod string, URI string, body string) (*http.Response, error) {
+	reqBody := bytes.NewBuffer([]byte(body))
+	req, err := http.NewRequest(
+		httpMethod,
+		fmt.Sprint(BaseURL, URI),
+		reqBody,
+	)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	req.Header.Add("Auth-method", "Password")
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept-Charset", "UTF-8")
+
+	cookieAccessToken := &http.Cookie{
+		Name:  "Access-token",
+		Value: c.AccessToken,
+	}
+	req.AddCookie(cookieAccessToken)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return resp, nil
 }
