@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	BaseURL string = "https://dev.gnivc.ru/tools/suft/api/v1/"
+	BaseURL      string = "https://dev.gnivc.ru/tools/suft/api/v1/"
+	SchedulesURI string = "api/v1/schedules/"
 )
 
 type Options struct {
@@ -41,7 +42,6 @@ type client struct {
 	BaseURL      string
 	AccessToken  string
 	RefreshToken string
-	request      *http.Request
 	httpClient   *http.Client
 }
 
@@ -54,8 +54,6 @@ func NewClient(email string, password string) (API, error) {
 		BaseURL:      BaseURL,
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
-		request: &http.Request{Header: map[string][]string{"Auth-method": []string{"password"},
-			"Content-type": []string{"application/json; charset=UTF-8"}}},
 		httpClient: &http.Client{
 			Timeout: time.Minute,
 		},
@@ -63,26 +61,17 @@ func NewClient(email string, password string) (API, error) {
 }
 
 func (c *client) Schedules(options *Options) ([]schedule.Schedule, error) {
-	cli := c.httpClient
-	req := c.request
-	req.Method = http.MethodGet
-	reqURL, err := url.Parse(fmt.Sprint(BaseURL, "api/v1/schedules?page=1&size=5&creatorApprover=creator"))
+
+	reqURL, err := url.Parse(SchedulesURI)
+	queryString := reqURL.Query()
+	queryString.Set("creatorApprover", "creator")
+	reqURL.RawQuery = queryString.Encode()
+	base, err := url.Parse(BaseURL)
 	if err != nil {
 		return nil, err
 	}
-	req.URL = reqURL
-	cookie1 := &http.Cookie{
-		Name:  "Access-token",
-		Value: c.AccessToken,
-	}
-	cookie2 := &http.Cookie{
-		Name:  "Refresh-token",
-		Value: c.RefreshToken,
-	}
-	req.AddCookie(cookie1)
-	req.AddCookie(cookie2)
-
-	resp, err := cli.Do(req)
+	reqURL = base.ResolveReference(reqURL)
+	resp, err := c.doHttp(http.MethodGet, reqURL, nil)
 	if err != nil {
 		log.Println(err)
 		return nil, err
