@@ -11,9 +11,18 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Printf("Access-token: %s \nRefresh-token: %s\n", client.AccessToken, client.RefreshToken)
-	schedules, err := client.Schedules(nil)
-	for _, schedule := range schedules{
+	// без геттеров в интерфейсе посмотреть токены не получится. можно посмотреть их в auth_test.go
+	// fmt.Printf("Access-token: %s \nRefresh-token: %s\n", client.AccessToken, client.RefreshToken)
+	options := &api.Options{
+		Page:            1,
+		Size:            5,
+		CreatorApprover: "creator",
+	}
+	schedules, err := client.Schedules(options)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for _, schedule := range schedules {
 		fmt.Println(schedule)
 	}
 }

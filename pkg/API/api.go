@@ -8,21 +8,21 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"suft_sdk/internal/auth"
-	"suft_sdk/internal/http-client/logging-time"
+	logging_time "suft_sdk/internal/http-client/logging-time"
 	"suft_sdk/internal/http-client/schedule"
 	"time"
 )
 
 const (
 	BaseURL      string = "https://dev.gnivc.ru/tools/suft/api/v1/"
-	SchedulesURI string = "api/v1/schedules/"
+	SchedulesURN string = "api/v1/schedules"
 )
 
 type Options struct {
-	Page int `json:"page"`
-	Size int `json:"size"`
+	Page            int    `json:"page"`
+	Size            int    `json:"size"`
+	CreatorApprover string `json:"creator_approver"`
 }
 
 type API interface {
@@ -61,17 +61,24 @@ func NewClient(email string, password string) (API, error) {
 }
 
 func (c *client) Schedules(options *Options) ([]schedule.Schedule, error) {
+	// если хочешь, можем досконально изучить пакет url и сделать элегантно,
+	// однако на данном этапе предлагаю сделать наиболее доступным, простым и рабочим способом,
+	// как я сделал ниже, а потом, если останется время, то переделаем с использованием пакета url.
+	// reqURL, err := url.Parse(SchedulesURN)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// queryString := reqURL.Query()
+	// queryString.Set("creatorApprover", "creator")
+	// reqURL.RawQuery = queryString.Encode()
+	// base, err := url.Parse(BaseURL)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// reqURL = base.ResolveReference(reqURL)
 
-	reqURL, err := url.Parse(SchedulesURI)
-	queryString := reqURL.Query()
-	queryString.Set("creatorApprover", "creator")
-	reqURL.RawQuery = queryString.Encode()
-	base, err := url.Parse(BaseURL)
-	if err != nil {
-		return nil, err
-	}
-	reqURL = base.ResolveReference(reqURL)
-	resp, err := c.doHttp(http.MethodGet, reqURL, nil)
+	URN := fmt.Sprint(SchedulesURN, "?page=", options.Page, "&size=", options.Size, "&creatorApprover=", options.CreatorApprover)
+	resp, err := c.doHTTP(http.MethodGet, URN, nil)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -135,11 +142,11 @@ func (c *client) ApproveSchedule(scheduleId int, loggingTimeId int, status *sche
 	panic("implement me")
 }
 
-func (c *client) doHttp(httpMethod string, URI string, body string) (*http.Response, error) {
-	reqBody := bytes.NewBuffer([]byte(body))
+func (c *client) doHTTP(httpMethod string, URN string, body []byte) (*http.Response, error) {
+	reqBody := bytes.NewBuffer(body)
 	req, err := http.NewRequest(
 		httpMethod,
-		fmt.Sprint(BaseURL, URI),
+		fmt.Sprint(BaseURL, URN),
 		reqBody,
 	)
 	if err != nil {
@@ -161,6 +168,5 @@ func (c *client) doHttp(httpMethod string, URI string, body string) (*http.Respo
 		log.Println(err)
 		return nil, err
 	}
-	defer resp.Body.Close()
 	return resp, nil
 }
