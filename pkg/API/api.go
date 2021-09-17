@@ -76,8 +76,15 @@ func (c *client) Schedules(options *Options) ([]schedule.Schedule, error) {
 	// 	return nil, err
 	// }
 	// reqURL = base.ResolveReference(reqURL)
-
-	URN := fmt.Sprint(SchedulesURN, "?page=", options.Page, "&size=", options.Size, "&creatorApprover=", options.CreatorApprover)
+	page := 1
+	size := 5
+	creatorApprover := "creator"
+	if options != nil {
+		page = options.Page
+		size = options.Size
+		creatorApprover = options.CreatorApprover
+	}
+	URN := fmt.Sprint(SchedulesURN, "?page=", page, "&size=", size, "&creatorApprover=", creatorApprover)
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
 	if err != nil {
 		log.Println(err)
