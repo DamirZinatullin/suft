@@ -14,8 +14,8 @@ const baseURL = "https://dev.gnivc.ru/tools/suft/api/v1/"
 const refreshURL = "security/refresh-token"
 
 type Token struct {
-	AccessToken  string
-	RefreshToken string
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func Authenticate(email string, password string) (*Token, error) {
