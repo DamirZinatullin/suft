@@ -35,11 +35,11 @@ func main() {
 	Flags := []cli.Flag{}
 	app.Commands = []cli.Command{
 		{
-			Name:  "init",
-			Usage: "Инициализация клиента",
+			Name:  "login",
+			Usage: "Авторизация клиента",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
-				err := initSuft()
+				err := loginSuft()
 				if err != nil {
 					return err
 				}
@@ -88,7 +88,7 @@ func main() {
 	}
 }
 
-func initSuft() error {
+func loginSuft() error {
 	reader := bufio.NewReader(os.Stdin)
 	_, _ = os.Stdout.Write([]byte("Введите логин пользователя системы СУФТ:\n"))
 	login, _ := reader.ReadString('\n')
