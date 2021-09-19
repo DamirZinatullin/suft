@@ -170,7 +170,7 @@ func configPath() (pathConfig string, err error) {
 func newClientFromConfig() (client api.API, err error) {
 	_, err = configExists()
 	if err != nil {
-		return nil, errors.New("не инициализирован клиент, выполните команду init")
+		return nil, errors.New("не инициализирован клиент, выполните команду login")
 	}
 	configPath, _ := configPath()
 	data, err := ioutil.ReadFile(configPath)
