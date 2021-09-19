@@ -1,6 +1,8 @@
 package logging_time
 
-import "suft_sdk/internal/http-client/schedule"
+import (
+	"suft_sdk/internal/schedule"
+)
 
 type TimeLoggerInterface interface {
 	Validate()

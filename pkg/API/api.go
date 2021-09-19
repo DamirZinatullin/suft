@@ -9,8 +9,8 @@ import (
 	"log"
 	"net/http"
 	"suft_sdk/internal/auth"
-	logging_time "suft_sdk/internal/http-client/logging-time"
-	"suft_sdk/internal/http-client/schedule"
+	"suft_sdk/internal/logging-time"
+	"suft_sdk/internal/schedule"
 	"time"
 )
 
