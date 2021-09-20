@@ -18,7 +18,14 @@ func main() {
 		log.Fatalln(err)
 	}
 	for _, schedule := range schedules {
-		fmt.Println(schedule)
+		fmt.Printf("%#v\n",schedule)
 	}
+	schedule, err := client.DetailSchedule(32884)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Printf("\n\n%#v\n",*schedule)
+
+
 }
 

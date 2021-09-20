@@ -28,7 +28,7 @@ type Options struct {
 type API interface {
 	Schedules(options *Options) ([]schedule.Schedule, error)
 	AddSchedule(periodId int) error
-	DetailSchedule(scheduleId int) error
+	DetailSchedule(scheduleId int) (*schedule.Schedule, error)
 	LoggingTimeList(scheduleId int, options *Options) ([]logging_time.LoggingTime, error)
 	AddLoggingTime(scheduleId int, loggingTime *logging_time.AddLoggingTime) error
 	DetailLoggingTime(scheduleId int, loggingTimeId int) error
@@ -117,8 +117,33 @@ func (c *Client) AddSchedule(periodId int) error {
 	panic("implement me")
 }
 
-func (c *Client) DetailSchedule(scheduleId int) error {
-	panic("implement me")
+func (c *Client) DetailSchedule(scheduleId int) (*schedule.Schedule ,error) {
+	URN := fmt.Sprintf("%s/%d", SchedulesURN, scheduleId)
+	resp, err := c.doHTTP(http.MethodGet, URN, nil)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("unable to get schedule")
+	}
+
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("unable to read response body:", err)
+		return nil, err
+	}
+	schedule := schedule.Schedule{}
+	err = json.Unmarshal(respB, &schedule)
+	if err != nil {
+		log.Println("unable to unmarshal response body:", err)
+		return nil, err
+	}
+
+	return &schedule, nil
 }
 
 func (c *Client) LoggingTimeList(scheduleId int, options *Options) ([]logging_time.LoggingTime, error) {
