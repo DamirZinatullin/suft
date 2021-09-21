@@ -9,7 +9,7 @@ import (
 	"log"
 	"net/http"
 	"suft_sdk/internal/auth"
-	"suft_sdk/internal/logging-time"
+	logging_time "suft_sdk/internal/logging-time"
 	"suft_sdk/internal/schedule"
 	"time"
 )
@@ -17,12 +17,19 @@ import (
 const (
 	BaseURL      string = "https://dev.gnivc.ru/tools/suft/api/v1/"
 	SchedulesURN string = "api/v1/schedules"
+
+	LoggingTimeURN string = "logging-times"
+
+	Creator  Role = "creator"
+	Approver Role = "approver"
 )
 
+type Role string
+
 type Options struct {
-	Page            int    `json:"page"`
-	Size            int    `json:"size"`
-	CreatorApprover string `json:"creator_approver"`
+	Page            int  `json:"page"`
+	Size            int  `json:"size"`
+	CreatorApprover Role `json:"creator_approver"`
 }
 
 type ScheduleId int
@@ -34,7 +41,7 @@ type API interface {
 	AddSchedule(periodId PeriodId) (*schedule.Schedule, error)
 	DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
 	LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error)
-	AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) error
+	AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) (*logging_time.LoggingTime, error)
 	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
 	EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime)
 	DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
@@ -82,7 +89,7 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 	// reqURL = base.ResolveReference(reqURL)
 	page := 1
 	size := 5
-	creatorApprover := "creator"
+	creatorApprover := Creator
 	if options != nil {
 		page = options.Page
 		size = options.Size
@@ -98,19 +105,19 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("unable to get schedules")
+		return nil, errors.New("Schedules: unable to get schedules")
 	}
 
 	respB, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("unable to read response body:", err)
+		log.Println("Schedules: unable to read response body:", err)
 		return nil, err
 	}
 
 	schedules := make([]schedule.Schedule, 1)
 	err = json.Unmarshal(respB, &schedules)
 	if err != nil {
-		log.Println("unable to unmarshal response body:", err)
+		log.Println("Schedules: unable to unmarshal response body:", err)
 		return nil, err
 	}
 
@@ -143,6 +150,7 @@ func (c *Client) AddSchedule(periodId PeriodId) (*schedule.Schedule, error) {
 }
 
 func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error) {
+
 	URN := fmt.Sprintf("%s/%d", SchedulesURN, scheduleId)
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
 	if err != nil {
@@ -153,18 +161,18 @@ func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, erro
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("unable to get schedule")
+		return nil, errors.New("DetailSchedule: unable to get schedule")
 	}
 
 	respB, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("unable to read response body:", err)
+		log.Println("DetailSchedule: unable to read response body:", err)
 		return nil, err
 	}
 	schedule := schedule.Schedule{}
 	err = json.Unmarshal(respB, &schedule)
 	if err != nil {
-		log.Println("unable to unmarshal response body:", err)
+		log.Println("DetailSchedule: unable to unmarshal response body:", err)
 		return nil, err
 	}
 
@@ -172,11 +180,70 @@ func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, erro
 }
 
 func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error) {
-	panic("implement me")
+	page := 1
+	size := 5
+	if options != nil {
+		page = options.Page
+		size = options.Size
+	}
+
+	URN := fmt.Sprint(SchedulesURN, "/", scheduleId, "/logging-times?page=", page, "&size=", size)
+
+	resp, err := c.doHTTP(http.MethodGet, URN, nil)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("LoggingTimeList: unable to get logging-times")
+	}
+
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("LoggingTimeList: unable to read response body:", err)
+		return nil, err
+	}
+	loggingTimes := []logging_time.LoggingTime{}
+	err = json.Unmarshal(respB, &loggingTimes)
+	if err != nil {
+		log.Println("LoggingTimeList: unable to unmarshal response body:", err)
+		return nil, err
+	}
+
+	return loggingTimes, nil
+
 }
 
-func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) error {
-	panic("implement me")
+func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) (*logging_time.LoggingTime, error) {
+
+	reqB, err := json.Marshal(loggingTime)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("\n%s\n\n", string(reqB))
+
+	URN := fmt.Sprintf("%s/%d/%s", SchedulesURN, scheduleId, LoggingTimeURN)
+	resp, err := c.doHTTP(http.MethodPost, URN, reqB)
+	if err != nil {
+		return nil, err
+	}
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("unable to read response body:", err)
+		return nil, err
+	}
+	fmt.Println(string(respB))
+	loggingTimeResp := logging_time.LoggingTime{}
+	err = json.Unmarshal(respB, &loggingTimeResp)
+	if err != nil {
+		log.Println("unable to unmarshal response body:", err)
+		return nil, err
+	}
+	return &loggingTimeResp, nil
+
 }
 
 func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error {
