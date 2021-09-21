@@ -182,7 +182,8 @@ func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(string(reqB))
+	fmt.Printf("\n%s\n\n", string(reqB))
+
 	URN := fmt.Sprintf("%s/%d/%s", SchedulesURN, scheduleId, LoggingTimeURN)
 	resp, err := c.doHTTP(http.MethodPost, URN, reqB)
 	if err != nil {
@@ -193,6 +194,7 @@ func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time
 		log.Println("unable to read response body:", err)
 		return nil, err
 	}
+	fmt.Println(string(respB))
 	loggingTimeResp := logging_time.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTimeResp)
 	if err != nil {

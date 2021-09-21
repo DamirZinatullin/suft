@@ -35,7 +35,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	fmt.Printf("\nДобавление расписания\n")
-	fmt.Printf("%#v\n",*schedule)
+	fmt.Printf("%#v\n\n",*schedule)
 
 
 	addLT := logging_time.AddLoggingTime{
