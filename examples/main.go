@@ -20,7 +20,7 @@ func main() {
 	}
 	fmt.Printf("\nСписок расписаний\n")
 	for _, schedule := range schedules {
-		fmt.Printf("%#v\n",schedule)
+		fmt.Printf("%#v\n", schedule)
 	}
 	schedule, err := client.DetailSchedule(32884)
 	if err != nil {
@@ -53,6 +53,12 @@ func main() {
 	}
 	client.AddLoggingTime(32884, &addLT)
 
-
+	loggingTimes, err := client.LoggingTimeList(32907, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println()
+	for _, loggingTime := range loggingTimes {
+		fmt.Println(loggingTime)
+	}
 }
-
