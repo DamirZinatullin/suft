@@ -17,12 +17,11 @@ import (
 const (
 	BaseURL      string = "https://dev.gnivc.ru/tools/suft/api/v1/"
 	SchedulesURN string = "api/v1/schedules"
-<<<<<<< HEAD:pkg/api/api.go
+
 	LoggingTimeURN string = "logging-times"
-=======
-	Creator      Role   = "creator"
-	Approver     Role   = "approver"
->>>>>>> httpclient:pkg/API/api.go
+
+	Creator  Role = "creator"
+	Approver Role = "approver"
 )
 
 type Role string
@@ -150,11 +149,8 @@ func (c *Client) AddSchedule(periodId PeriodId) (*schedule.Schedule, error) {
 	return &schedule, nil
 }
 
-<<<<<<< HEAD:pkg/api/api.go
 func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error) {
-=======
-func (c *Client) DetailSchedule(scheduleId int) (*schedule.Schedule, error) {
->>>>>>> httpclient:pkg/API/api.go
+
 	URN := fmt.Sprintf("%s/%d", SchedulesURN, scheduleId)
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
 	if err != nil {
@@ -183,11 +179,7 @@ func (c *Client) DetailSchedule(scheduleId int) (*schedule.Schedule, error) {
 	return &schedule, nil
 }
 
-<<<<<<< HEAD:pkg/api/api.go
 func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error) {
-	panic("implement me")
-=======
-func (c *Client) LoggingTimeList(scheduleId int, options *Options) ([]logging_time.LoggingTime, error) {
 	page := 1
 	size := 5
 	if options != nil {
@@ -222,7 +214,7 @@ func (c *Client) LoggingTimeList(scheduleId int, options *Options) ([]logging_ti
 	}
 
 	return loggingTimes, nil
->>>>>>> httpclient:pkg/API/api.go
+
 }
 
 func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) (*logging_time.LoggingTime, error) {

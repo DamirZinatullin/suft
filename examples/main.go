@@ -37,28 +37,33 @@ func main() {
 	fmt.Printf("\nДобавление расписания\n")
 	fmt.Printf("%#v\n\n",*schedule)
 
+	loggingTimes, err := client.LoggingTimeList(32907, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Printf("\nСписок расписаний\n")
+	for _, loggingTime := range loggingTimes {
+		fmt.Println(loggingTime)
+	}
 
 	addLT := logging_time.AddLoggingTime{
 		CommentEmployee: "hi",
 		Day1Time:        4,
 		Day2Time:        5,
 		Day3Time:        3,
-		Day4Time:        23,
+		Day4Time:        1,
 		Day5Time:        5,
 		Day6Time:        3,
 		Day7Time:        2,
-		ProjectId:       4,
+		ProjectId:       8028,
 		Task:            "dfgf",
-		WorkKindId:      0,
+		WorkKindId:      21,
 	}
-	client.AddLoggingTime(32884, &addLT)
-
-	loggingTimes, err := client.LoggingTimeList(32907, nil)
+	loggingTimeCreated, err := client.AddLoggingTime(32907, &addLT)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println()
-	for _, loggingTime := range loggingTimes {
-		fmt.Println(loggingTime)
-	}
+	fmt.Printf("\nДобавление LoggingTime\n")
+	fmt.Printf("%#v\n\n",*loggingTimeCreated)
+
 }
