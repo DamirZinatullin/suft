@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	logging_time "suft_sdk/internal/logging-time"
 	api "suft_sdk/pkg/api"
 )
 
@@ -25,6 +26,21 @@ func main() {
 		log.Fatalln(err)
 	}
 	fmt.Printf("\n\n%#v\n",*schedule)
+
+	addLT := logging_time.AddLoggingTime{
+		CommentEmployee: "hi",
+		Day1Time:        4,
+		Day2Time:        5,
+		Day3Time:        3,
+		Day4Time:        23,
+		Day5Time:        5,
+		Day6Time:        3,
+		Day7Time:        2,
+		ProjectId:       4,
+		Task:            "dfgf",
+		WorkKindId:      0,
+	}
+	client.AddLoggingTime(32884, &addLT)
 
 
 }
