@@ -36,14 +36,14 @@ func main() {
 	app.Commands = []cli.Command{
 		{
 			Name:  "login",
-			Usage: "Авторизация клиента",
+			Usage: "Аутентификация клиента",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
 				err := loginSuft()
 				if err != nil {
 					return err
 				}
-				fmt.Println("Клиент успешно авторизован")
+				fmt.Println("Клиент успешно прошел аутентификацию")
 				return nil
 			}},
 		{

@@ -25,17 +25,21 @@ type Options struct {
 	CreatorApprover string `json:"creator_approver"`
 }
 
+type ScheduleId int
+type LoggingTimeId int
+type PeriodId int
+
 type API interface {
 	Schedules(options *Options) ([]schedule.Schedule, error)
-	AddSchedule(periodId int) error
-	DetailSchedule(scheduleId int) (*schedule.Schedule, error)
-	LoggingTimeList(scheduleId int, options *Options) ([]logging_time.LoggingTime, error)
-	AddLoggingTime(scheduleId int, loggingTime *logging_time.AddLoggingTime) error
-	DetailLoggingTime(scheduleId int, loggingTimeId int) error
-	EditLoggingTime(scheduleId int, loggingTimeId int, loggingTime *logging_time.EditLoggingTime)
-	DeleteLoggingTime(scheduleId int, loggingTimeId int) error
-	SubmitForApproveSchedule(scheduleId int, loggingTimeId int, status *schedule.EditStatusSchedule) error
-	ApproveSchedule(scheduleId int, loggingTimeId int, status *schedule.EditStatusSchedule) error
+	AddSchedule(periodId PeriodId) error
+	DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
+	LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error)
+	AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) error
+	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
+	EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime)
+	DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
+	SubmitForApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error
+	ApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error
 }
 
 type Client struct {
@@ -113,11 +117,11 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 	return schedules, nil
 }
 
-func (c *Client) AddSchedule(periodId int) error {
+func (c *Client) AddSchedule(periodId PeriodId) error {
 	panic("implement me")
 }
 
-func (c *Client) DetailSchedule(scheduleId int) (*schedule.Schedule ,error) {
+func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule ,error) {
 	URN := fmt.Sprintf("%s/%d", SchedulesURN, scheduleId)
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
 	if err != nil {
@@ -146,31 +150,31 @@ func (c *Client) DetailSchedule(scheduleId int) (*schedule.Schedule ,error) {
 	return &schedule, nil
 }
 
-func (c *Client) LoggingTimeList(scheduleId int, options *Options) ([]logging_time.LoggingTime, error) {
+func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error) {
 	panic("implement me")
 }
 
-func (c *Client) AddLoggingTime(scheduleId int, loggingTime *logging_time.AddLoggingTime) error {
+func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) error {
 	panic("implement me")
 }
 
-func (c *Client) DetailLoggingTime(scheduleId int, loggingTimeId int) error {
+func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error {
 	panic("implement me")
 }
 
-func (c *Client) EditLoggingTime(scheduleId int, loggingTimeId int, loggingTime *logging_time.EditLoggingTime) {
+func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime) {
 	panic("implement me")
 }
 
-func (c *Client) DeleteLoggingTime(scheduleId int, loggingTimeId int) error {
+func (c *Client) DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error {
 	panic("implement me")
 }
 
-func (c *Client) SubmitForApproveSchedule(scheduleId int, loggingTimeId int, status *schedule.EditStatusSchedule) error {
+func (c *Client) SubmitForApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error {
 	panic("implement me")
 }
 
-func (c *Client) ApproveSchedule(scheduleId int, loggingTimeId int, status *schedule.EditStatusSchedule) error {
+func (c *Client) ApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error {
 	panic("implement me")
 }
 
