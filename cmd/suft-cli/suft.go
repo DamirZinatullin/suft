@@ -15,7 +15,7 @@ import (
 	"path"
 	"strings"
 	"suft_sdk/internal/auth"
-	api "suft_sdk/pkg/API"
+	api "suft_sdk/pkg/api"
 	"syscall"
 	"time"
 )
@@ -31,7 +31,7 @@ const configDirName string = "suft"
 func main() {
 	app := cli.NewApp()
 	app.Name = "SUFT CLI"
-	app.Usage = "CLI предоставляет возможность взаимодействия с API СУФТ (системы учета фактических трудозатрат)"
+	app.Usage = "CLI предоставляет возможность взаимодействия с api СУФТ (системы учета фактических трудозатрат)"
 	Flags := []cli.Flag{}
 	app.Commands = []cli.Command{
 		{

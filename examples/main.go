@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	api "suft_sdk/pkg/API"
+	api "suft_sdk/pkg/api"
 )
 
 func main() {
