@@ -31,7 +31,7 @@ type PeriodId int
 
 type API interface {
 	Schedules(options *Options) ([]schedule.Schedule, error)
-	AddSchedule(periodId PeriodId) error
+	AddSchedule(periodId PeriodId) (*schedule.Schedule, error)
 	DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
 	LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error)
 	AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) error
@@ -117,11 +117,32 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 	return schedules, nil
 }
 
-func (c *Client) AddSchedule(periodId PeriodId) error {
-	panic("implement me")
+func (c *Client) AddSchedule(periodId PeriodId) (*schedule.Schedule, error) {
+
+	reqS := fmt.Sprintf(
+		`{
+   "periodId": %d
+}`, periodId)
+	reqB := []byte(reqS)
+	resp, err := c.doHTTP(http.MethodPost, SchedulesURN, reqB)
+	if err != nil {
+		return nil, err
+	}
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("unable to read response body:", err)
+		return nil, err
+	}
+	schedule := schedule.Schedule{}
+	err = json.Unmarshal(respB, &schedule)
+	if err != nil {
+		log.Println("unable to unmarshal response body:", err)
+		return nil, err
+	}
+	return &schedule, nil
 }
 
-func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule ,error) {
+func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error) {
 	URN := fmt.Sprintf("%s/%d", SchedulesURN, scheduleId)
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
 	if err != nil {

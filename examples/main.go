@@ -17,6 +17,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Printf("\nСписок расписаний\n")
 	for _, schedule := range schedules {
 		fmt.Printf("%#v\n",schedule)
 	}
@@ -24,7 +25,17 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Printf("\n\n%#v\n",*schedule)
+	fmt.Printf("\nДетализация расписания\n")
+	fmt.Printf("%#v\n",*schedule)
+
+	periodId := api.PeriodId(353)
+	schedule, err = client.AddSchedule(periodId)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Printf("\nДобавление расписания\n")
+	fmt.Printf("%#v\n",*schedule)
+
 
 
 }
