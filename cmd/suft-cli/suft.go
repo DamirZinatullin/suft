@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"suft_sdk/internal/auth"
 	api "suft_sdk/pkg/api"
@@ -39,6 +40,7 @@ func main() {
 		{
 			Name:  "login",
 			Usage: "Аутентификация клиента",
+			Category: "Клиент",
 			Flags: Flags,
 			Action: func(c *cli.Context) error {
 				err := loginSuft()
@@ -52,6 +54,7 @@ func main() {
 			Name:  "logout",
 			Usage: "Выход из клиента",
 			Flags: Flags,
+			Category: "Клиент",
 			Action: func(c *cli.Context) error {
 				err := logoutSuft()
 				if err != nil {
@@ -64,7 +67,12 @@ func main() {
 			Name:  "schedules",
 			Usage: "Список расписаний",
 			Flags: Flags,
+			Category: "Расписания",
 			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
 				client, err := newClientFromConfig()
 				if err != nil {
 					return err
@@ -81,6 +89,38 @@ func main() {
 					}
 					fmt.Printf("%s\n", scheduleJSON)
 				}
+				return nil
+			}},
+		{
+			Name:  "schedule",
+			Usage: "Детализация расписания",
+			Flags: Flags,
+			Category: "Расписания",
+			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
+				client, err := newClientFromConfig()
+				if err != nil {
+					return err
+				}
+				schedIdInt, err := strconv.Atoi(c.Args().First())
+				if err != nil {
+					return err
+				}
+				schedId := api.ScheduleId(schedIdInt)
+
+				schedule, err := client.DetailSchedule(schedId)
+				if err != nil {
+					return err
+				}
+				scheduleJSON, err := json.Marshal(schedule)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("%s\n", scheduleJSON)
+
 				return nil
 			}},
 	}
@@ -191,6 +231,33 @@ func newClientFromConfig() (client api.API, err error) {
 	}
 
 	return client, nil
+}
+
+
+func refreshConfig()error{
+	_, err := configExists()
+	if err != nil {
+		return errors.New("не инициализирован клиент, выполните команду login")
+	}
+	configPath, _ := configPath()
+	data, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		return err
+	}
+	userConf := userConfig{}
+	err = json.Unmarshal(data, &userConf)
+	if userConf.DateRefresh.Add(time.Minute*2).After(time.Now()) {
+		return nil
+	}
+	token, err := auth.Refresh(userConf.Token.RefreshToken)
+	if err != nil {
+		return err
+	}
+	err = writeConfig(token)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func configExists() (bool, error) {
