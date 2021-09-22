@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"bufio"
 	"encoding/json"
 	"errors"
@@ -30,18 +29,17 @@ type userConfig struct {
 const configFileName string = "suft_config.json"
 const configDirName string = "suft"
 
+var scheduleId string
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "SUFT CLI"
 	app.Usage = "CLI предоставляет возможность взаимодействия с api СУФТ (системы учета фактических трудозатрат)"
-	Flags := []cli.Flag{}
 	app.Commands = []cli.Command{
 		{
-			Name:  "login",
-			Usage: "Аутентификация клиента",
+			Name:     "login",
+			Usage:    "Аутентификация клиента",
 			Category: "Клиент",
-			Flags: Flags,
 			Action: func(c *cli.Context) error {
 				err := loginSuft()
 				if err != nil {
@@ -51,9 +49,8 @@ func main() {
 				return nil
 			}},
 		{
-			Name:  "logout",
-			Usage: "Выход из клиента",
-			Flags: Flags,
+			Name:     "logout",
+			Usage:    "Выход из клиента",
 			Category: "Клиент",
 			Action: func(c *cli.Context) error {
 				err := logoutSuft()
@@ -64,9 +61,8 @@ func main() {
 				return nil
 			}},
 		{
-			Name:  "schedules",
-			Usage: "Список расписаний",
-			Flags: Flags,
+			Name:     "schedules",
+			Usage:    "Список расписаний",
 			Category: "Расписания",
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
@@ -82,7 +78,7 @@ func main() {
 					return err
 				}
 
-				for _, schedule := range schedules{
+				for _, schedule := range schedules {
 					scheduleJSON, err := json.Marshal(schedule)
 					if err != nil {
 						return err
@@ -94,7 +90,6 @@ func main() {
 		{
 			Name:  "schedule",
 			Usage: "Детализация расписания",
-			Flags: Flags,
 			Category: "Расписания",
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
@@ -107,11 +102,43 @@ func main() {
 				}
 				schedIdInt, err := strconv.Atoi(c.Args().First())
 				if err != nil {
-					return err
+					return errors.New("required to pass valid scheduleID")
 				}
 				schedId := api.ScheduleId(schedIdInt)
 
 				schedule, err := client.DetailSchedule(schedId)
+				if err != nil {
+					return err
+				}
+				scheduleJSON, err := json.Marshal(schedule)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("%s\n", scheduleJSON)
+
+				return nil
+			}},
+		{
+			Name:        "addSchedule",
+			Usage:       "Добавление расписания",
+			Description: "Для добавления расписания необходимо передать Id периуда",
+			Category:    "Расписания",
+			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
+				client, err := newClientFromConfig()
+				if err != nil {
+					return err
+				}
+				periodIdInt, err := strconv.Atoi(c.Args().First())
+				if err != nil {
+					return errors.New("required to pass valid periodID")
+				}
+				periodId := api.PeriodId(periodIdInt)
+
+				schedule, err := client.AddSchedule(periodId)
 				if err != nil {
 					return err
 				}
@@ -152,7 +179,7 @@ func loginSuft() error {
 	return nil
 }
 
-func logoutSuft() error{
+func logoutSuft() error {
 	_, err := configExists()
 	if err != nil {
 		return err
@@ -233,8 +260,7 @@ func newClientFromConfig() (client api.API, err error) {
 	return client, nil
 }
 
-
-func refreshConfig()error{
+func refreshConfig() error {
 	_, err := configExists()
 	if err != nil {
 		return errors.New("не инициализирован клиент, выполните команду login")
@@ -246,7 +272,7 @@ func refreshConfig()error{
 	}
 	userConf := userConfig{}
 	err = json.Unmarshal(data, &userConf)
-	if userConf.DateRefresh.Add(time.Minute*2).After(time.Now()) {
+	if userConf.DateRefresh.Add(time.Minute * 2).After(time.Now()) {
 		return nil
 	}
 	token, err := auth.Refresh(userConf.Token.RefreshToken)
@@ -273,3 +299,6 @@ func configExists() (bool, error) {
 
 }
 
+func genScheduleFile(client api.Client) error {
+	return nil
+}
