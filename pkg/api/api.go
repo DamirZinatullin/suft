@@ -42,7 +42,7 @@ type API interface {
 	DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
 	LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error)
 	AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) (*logging_time.LoggingTime, error)
-	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
+	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*logging_time.LoggingTime, error)
 	EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime)
 	DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
 	SubmitForApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error
@@ -135,15 +135,17 @@ func (c *Client) AddSchedule(periodId PeriodId) (*schedule.Schedule, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
+
 	respB, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("unable to read response body:", err)
+		log.Println("AddSchedule: unable to read response body:", err)
 		return nil, err
 	}
 	schedule := schedule.Schedule{}
 	err = json.Unmarshal(respB, &schedule)
 	if err != nil {
-		log.Println("unable to unmarshal response body:", err)
+		log.Println("AddSchedule: unable to unmarshal response body:", err)
 		return nil, err
 	}
 	return &schedule, nil
@@ -187,7 +189,7 @@ func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *Options) ([]log
 		size = options.Size
 	}
 
-	URN := fmt.Sprint(SchedulesURN, "/", scheduleId, "/logging-times?page=", page, "&size=", size)
+	URN := fmt.Sprintf("%s/%d/%s?page=%d&size=%d", SchedulesURN, scheduleId, LoggingTimeURN, page, size)
 
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
 	if err != nil {
@@ -230,24 +232,45 @@ func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
+
 	respB, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("unable to read response body:", err)
+		log.Println("AddLoggingTime: unable to read response body:", err)
 		return nil, err
 	}
 	fmt.Println(string(respB))
 	loggingTimeResp := logging_time.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTimeResp)
 	if err != nil {
-		log.Println("unable to unmarshal response body:", err)
+		log.Println("AddLoggingTime: unable to unmarshal response body:", err)
 		return nil, err
 	}
 	return &loggingTimeResp, nil
 
 }
 
-func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error {
-	panic("implement me")
+func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*logging_time.LoggingTime, error) {
+	URN := fmt.Sprintf("%s/%d/%s/%d", SchedulesURN, scheduleId, LoggingTimeURN, loggingTimeId)
+	resp, err := c.doHTTP(http.MethodGet, URN, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("DetailLoggingTime: unable to read response body:", err)
+		return nil, err
+	}
+
+	loggingTime := logging_time.LoggingTime{}
+	err = json.Unmarshal(respB, &loggingTime)
+	if err != nil {
+		log.Println("DetailLoggingTime: unable to unmarshal response body:", err)
+		return nil, err
+	}
+	return &loggingTime, nil
 }
 
 func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime) {

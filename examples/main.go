@@ -27,7 +27,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	fmt.Printf("\nДетализация расписания\n")
-	fmt.Printf("%#v\n",*schedule)
+	fmt.Printf("%#v\n", *schedule)
 
 	periodId := api.PeriodId(353)
 	schedule, err = client.AddSchedule(periodId)
@@ -35,7 +35,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	fmt.Printf("\nДобавление расписания\n")
-	fmt.Printf("%#v\n\n",*schedule)
+	fmt.Printf("%#v\n\n", *schedule)
 
 	loggingTimes, err := client.LoggingTimeList(32907, nil)
 	if err != nil {
@@ -64,6 +64,13 @@ func main() {
 		log.Fatalln(err)
 	}
 	fmt.Printf("\nДобавление LoggingTime\n")
-	fmt.Printf("%#v\n\n",*loggingTimeCreated)
+	fmt.Printf("%#v\n\n", *loggingTimeCreated)
 
+	// вывод информации по конкретному объекту трудозатрат (logging-time)
+	loggingTime, err := client.DetailLoggingTime(32907, 327702)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Printf("\nПодробная информация по LoggingTime\n")
+	fmt.Println(loggingTime)
 }
