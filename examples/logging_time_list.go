@@ -17,7 +17,7 @@ func main() {
 	}
 	fmt.Printf("Список временных затрат\n")
 	for _, loggingTime := range loggingTimes {
-		fmt.Println(loggingTime)
+		fmt.Printf("%#v\n\n",loggingTime)
 	}
 	loggingTimes, err = client.LoggingTimeList(32907, &api.OptionsLT{Size: 2, Page: 1})
 	if err != nil {
@@ -25,7 +25,7 @@ func main() {
 	}
 	fmt.Printf("\nСписок временных затрат при передаче опций\n")
 	for _, loggingTime := range loggingTimes {
-		fmt.Println(loggingTime)
+		fmt.Printf("%#v\n\n",loggingTime)
 	}
 
 }

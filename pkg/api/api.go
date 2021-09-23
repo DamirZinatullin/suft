@@ -33,8 +33,8 @@ type Options struct {
 }
 
 type OptionsLT struct {
-	Page            int  `json:"page"`
-	Size            int  `json:"size"`
+	Page int `json:"page"`
+	Size int `json:"size"`
 }
 
 type ScheduleId int
@@ -48,7 +48,7 @@ type API interface {
 	LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]logging_time.LoggingTime, error)
 	AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) (*logging_time.LoggingTime, error)
 	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*logging_time.LoggingTime, error)
-	EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime)
+	EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime) (*logging_time.LoggingTime, error)
 	DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
 	SubmitForApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error
 	ApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error
@@ -96,13 +96,13 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 	size := 5
 	creatorApprover := Creator
 	if options != nil {
-		if options.Page != 0{
+		if options.Page != 0 {
 			page = options.Page
 		}
-		if options.Size != 0{
+		if options.Size != 0 {
 			size = options.Size
 		}
-		if options.CreatorApprover != ""{
+		if options.CreatorApprover != "" {
 			creatorApprover = options.CreatorApprover
 		}
 	}
@@ -193,10 +193,10 @@ func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]l
 	page := 1
 	size := 5
 	if options != nil {
-		if options.Page != 0{
+		if options.Page != 0 {
 			page = options.Page
 		}
-		if options.Size != 0{
+		if options.Size != 0 {
 			size = options.Size
 		}
 	}
@@ -285,8 +285,32 @@ func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingT
 	return &loggingTime, nil
 }
 
-func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime) {
-	panic("implement me")
+func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime) (*logging_time.LoggingTime, error) {
+	reqB, err := json.Marshal(loggingTime)
+	if err != nil {
+		return nil, err
+	}
+	URN := fmt.Sprintf("%s/%d/%s/%d", SchedulesURN, scheduleId, LoggingTimeURN, loggingTimeId)
+	resp, err := c.doHTTP(http.MethodPut, URN, reqB)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("EditLoggingTime: unable to read response body:", err)
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(respB))
+	}
+	loggingTimeResp := logging_time.LoggingTime{}
+	err = json.Unmarshal(respB, &loggingTimeResp)
+	if err != nil {
+		log.Println("EditLoggingTime: unable to unmarshal response body:", err)
+		return nil, err
+	}
+	return &loggingTimeResp, nil
 }
 
 func (c *Client) DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error {
@@ -298,7 +322,7 @@ func (c *Client) DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingT
 	defer resp.Body.Close()
 	respB, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("DetailLoggingTime: unable to read response body:", err)
+		log.Println("DeleteLoggingTime: unable to read response body:", err)
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
@@ -306,7 +330,6 @@ func (c *Client) DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingT
 	}
 	return nil
 }
-
 
 func (c *Client) SubmitForApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error {
 	panic("implement me")
