@@ -101,19 +101,15 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 		log.Println(err)
 		return nil, err
 	}
-
 	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("Schedules: unable to get schedules")
-	}
-
 	respB, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Schedules: unable to read response body:", err)
 		return nil, err
 	}
-
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(respB))
+	}
 	schedules := make([]schedule.Schedule, 1)
 	err = json.Unmarshal(respB, &schedules)
 	if err != nil {
@@ -142,6 +138,10 @@ func (c *Client) AddSchedule(periodId PeriodId) (*schedule.Schedule, error) {
 		log.Println("AddSchedule: unable to read response body:", err)
 		return nil, err
 	}
+	if resp.StatusCode != http.StatusCreated {
+		return nil, errors.New(string(respB))
+	}
+
 	schedule := schedule.Schedule{}
 	err = json.Unmarshal(respB, &schedule)
 	if err != nil {
@@ -159,17 +159,14 @@ func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, erro
 		log.Println(err)
 		return nil, err
 	}
-
 	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("DetailSchedule: unable to get schedule")
-	}
-
 	respB, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("DetailSchedule: unable to read response body:", err)
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(respB))
 	}
 	schedule := schedule.Schedule{}
 	err = json.Unmarshal(respB, &schedule)
@@ -202,7 +199,9 @@ func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *Options) ([]log
 		log.Println("LoggingTimeList: unable to read response body:", err)
 		return nil, err
 	}
-
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(respB))
+	}
 	loggingTimes := []logging_time.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTimes)
 	if err != nil {
@@ -220,7 +219,6 @@ func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("\n%s\n\n", string(reqB))
 
 	URN := fmt.Sprintf("%s/%d/%s", SchedulesURN, scheduleId, LoggingTimeURN)
 	resp, err := c.doHTTP(http.MethodPost, URN, reqB)
@@ -234,7 +232,10 @@ func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time
 		log.Println("AddLoggingTime: unable to read response body:", err)
 		return nil, err
 	}
-	fmt.Println(string(respB))
+	if resp.StatusCode != http.StatusCreated {
+		return nil, errors.New(string(respB))
+	}
+
 	loggingTimeResp := logging_time.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTimeResp)
 	if err != nil {
@@ -258,7 +259,9 @@ func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingT
 		log.Println("DetailLoggingTime: unable to read response body:", err)
 		return nil, err
 	}
-
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(respB))
+	}
 	loggingTime := logging_time.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTime)
 	if err != nil {
