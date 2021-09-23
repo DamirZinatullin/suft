@@ -290,8 +290,23 @@ func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTim
 }
 
 func (c *Client) DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error {
-	panic("implement me")
+	URN := fmt.Sprintf("%s/%d/%s/%d", SchedulesURN, scheduleId, LoggingTimeURN, loggingTimeId)
+	resp, err := c.doHTTP(http.MethodDelete, URN, nil)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("DetailLoggingTime: unable to read response body:", err)
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(string(respB))
+	}
+	return nil
 }
+
 
 func (c *Client) SubmitForApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error {
 	panic("implement me")
