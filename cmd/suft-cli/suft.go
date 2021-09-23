@@ -30,6 +30,8 @@ const configFileName string = "suft_config.json"
 const configDirName string = "suft"
 
 var scheduleId int
+var page int
+var size int
 
 func main() {
 	app := cli.NewApp()
@@ -161,6 +163,16 @@ func main() {
 					Required: true,
 					Destination: &scheduleId,
 				},
+				cli.IntFlag{
+					Name: "page, p",
+					Usage: "Страница отображения",
+					Destination: &page,
+				},
+				cli.IntFlag{
+					Name: "size, s",
+					Usage: "Количество отображаемых элементов",
+					Destination: &size,
+				},
 			},
 			Category:    "Временные затраты",
 			Action: func(c *cli.Context) error {
@@ -172,8 +184,15 @@ func main() {
 				if err != nil {
 					return err
 				}
+				options := api.OptionsLT{}
+				if size != 0 {
+					options.Size = size
+				}
+				if page != 0 {
+					options.Page = page
+				}
 				scheduleId := api.ScheduleId(scheduleId)
-				loggingTimeList, err := client.LoggingTimeList(scheduleId, nil)
+				loggingTimeList, err := client.LoggingTimeList(scheduleId, &options)
 				if err != nil {
 					return err
 				}
@@ -182,7 +201,7 @@ func main() {
 					if err != nil {
 						return err
 					}
-					fmt.Printf("\n%s\n", loggingTimeJSON)
+					fmt.Printf("%s\n\n", loggingTimeJSON)
 				}
 				return nil
 			}},
