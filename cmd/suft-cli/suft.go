@@ -30,6 +30,7 @@ const configFileName string = "suft_config.json"
 const configDirName string = "suft"
 
 var scheduleId int
+var loggingTimeId int
 var page int
 var size int
 var role string
@@ -69,18 +70,18 @@ func main() {
 			Category: "Расписания",
 			Flags: []cli.Flag{
 				cli.IntFlag{
-					Name: "page, p",
-					Usage: "Страница отображения",
+					Name:        "page, p",
+					Usage:       "Страница отображения",
 					Destination: &page,
 				},
 				cli.IntFlag{
-					Name: "size, s",
-					Usage: "Количество отображаемых элементов",
+					Name:        "size, s",
+					Usage:       "Количество отображаемых элементов",
 					Destination: &size,
 				},
 				cli.StringFlag{
-					Name: "role, r",
-					Usage: "Роль клиента (approver или creator)",
+					Name:        "role, r",
+					Usage:       "Роль клиента (approver или creator)",
 					Destination: &role,
 				},
 			},
@@ -119,8 +120,8 @@ func main() {
 				return nil
 			}},
 		{
-			Name:  "schedule",
-			Usage: "Детализация расписания",
+			Name:     "schedule",
+			Usage:    "Детализация расписания",
 			Category: "Расписания",
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
@@ -182,28 +183,28 @@ func main() {
 				return nil
 			}},
 		{
-			Name:        "LoggingTimeList" ,
+			Name:        "LoggingTimeList",
 			Usage:       "Список временных затрат",
 			Description: "Для вывода списка временных затрат необходимо передать Id расписания",
 			Flags: []cli.Flag{
 				cli.IntFlag{
-					Name: "scheduleId, id",
-					Usage: "Id расписания",
-					Required: true,
+					Name:        "scheduleId, id",
+					Usage:       "Id расписания",
+					Required:    true,
 					Destination: &scheduleId,
 				},
 				cli.IntFlag{
-					Name: "page, p",
-					Usage: "Страница отображения",
+					Name:        "page, p",
+					Usage:       "Страница отображения",
 					Destination: &page,
 				},
 				cli.IntFlag{
-					Name: "size, s",
-					Usage: "Количество отображаемых элементов",
+					Name:        "size, s",
+					Usage:       "Количество отображаемых элементов",
 					Destination: &size,
 				},
 			},
-			Category:    "Временные затраты",
+			Category: "Временные затраты",
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
 				if err != nil {
@@ -232,6 +233,47 @@ func main() {
 					}
 					fmt.Printf("%s\n\n", loggingTimeJSON)
 				}
+				return nil
+			}},
+		{
+			Name:        "loggingTime",
+			Usage:       "Детализация временных затрат",
+			Description: "Для вывода временной затраты необходимо передать Id расписания и Id временой затраты",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:        "scheduleId, scid",
+					Usage:       "Id расписания",
+					Required:    true,
+					Destination: &scheduleId,
+				},
+				cli.IntFlag{
+					Name:        "loggingTimeId, ltid",
+					Usage:       "Id временной затраты",
+					Required:    true,
+					Destination: &loggingTimeId,
+				},
+			},
+			Category: "Временные затраты",
+			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
+				client, err := newClientFromConfig()
+				if err != nil {
+					return err
+				}
+				scheduleId := api.ScheduleId(scheduleId)
+				loggingTimeId := api.LoggingTimeId(loggingTimeId)
+				loggingTime, err := client.DetailLoggingTime(scheduleId, loggingTimeId)
+				if err != nil {
+					return err
+				}
+				loggingTimeJSON, err := json.Marshal(loggingTime)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("%s\n\n", loggingTimeJSON)
 				return nil
 			}},
 	}
