@@ -15,5 +15,5 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Printf("Трудозатрата успешно удалена\n")
+	fmt.Printf("Временная затрата успешно удалена\n")
 }
