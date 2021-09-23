@@ -31,12 +31,14 @@ const configFileName string = "suft_config.json"
 const configDirName string = "suft"
 const loggingTimeFileName string = "logging_time.json"
 
+
 var scheduleId int
 var loggingTimeId int
 var periodId int
 var page int
 var size int
 var role string
+var editor string
 
 func main() {
 	app := cli.NewApp()
@@ -299,6 +301,13 @@ func main() {
 					Required:    true,
 					Destination: &scheduleId,
 				},
+				cli.StringFlag{
+					Name:        "editor, e",
+					Usage:       "Используемый текстовый редактор",
+					Destination: &editor,
+					Value: "vim",
+					EnvVar: "EDITOR",
+				},
 			},
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
@@ -313,13 +322,12 @@ func main() {
 				if err != nil {
 					return err
 				}
-				cmd := exec.Command("vim", fmt.Sprintf("%s", path))
+				cmd := exec.Command(editor, fmt.Sprintf("%s", path))
 				cmd.Stdin = os.Stdin
 				cmd.Stdout = os.Stdout
 				err = cmd.Run()
 				scheduleId := api.ScheduleId(scheduleId)
 				loggingTime, err := loggingTimeFromFIle()
-
 				loggingTimeResp, err := client.AddLoggingTime(scheduleId, loggingTime)
 				if err != nil {
 					return err
@@ -390,7 +398,7 @@ func writeConfig(token *auth.Token) error {
 			return err
 		}
 	} else {
-		output, err = os.OpenFile(configPath, os.O_RDWR, os.ModePerm)
+		output, err = os.OpenFile(configPath, os.O_RDWR|os.O_TRUNC, os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -495,7 +503,7 @@ func genLoggingTimeFile() (path string, err error) {
 			return "", err
 		}
 	} else {
-		output, err = os.OpenFile(filePath, os.O_RDWR, os.ModePerm)
+		output, err = os.OpenFile(filePath, os.O_RDWR|os.O_TRUNC, os.ModePerm)
 		if err != nil {
 			return "", err
 		}

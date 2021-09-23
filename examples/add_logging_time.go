@@ -32,6 +32,4 @@ func main() {
 	}
 	fmt.Printf("Добавлен LoggingTime:\n")
 	fmt.Printf("%#v\n\n", *loggingTimeCreated)
-
-
 }
