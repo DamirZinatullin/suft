@@ -32,6 +32,7 @@ const configDirName string = "suft"
 var scheduleId int
 var page int
 var size int
+var role string
 
 func main() {
 	app := cli.NewApp()
@@ -66,6 +67,23 @@ func main() {
 			Name:     "schedules",
 			Usage:    "Список расписаний",
 			Category: "Расписания",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name: "page, p",
+					Usage: "Страница отображения",
+					Destination: &page,
+				},
+				cli.IntFlag{
+					Name: "size, s",
+					Usage: "Количество отображаемых элементов",
+					Destination: &size,
+				},
+				cli.StringFlag{
+					Name: "role, r",
+					Usage: "Роль клиента (approver или creator)",
+					Destination: &role,
+				},
+			},
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
 				if err != nil {
@@ -75,7 +93,18 @@ func main() {
 				if err != nil {
 					return err
 				}
-				schedules, err := client.Schedules(nil)
+				options := api.Options{}
+				if size != 0 {
+					options.Size = size
+				}
+				if page != 0 {
+					options.Page = page
+				}
+				if role != "" {
+					clientRole := api.Role(role)
+					options.CreatorApprover = clientRole
+				}
+				schedules, err := client.Schedules(&options)
 				if err != nil {
 					return err
 				}
