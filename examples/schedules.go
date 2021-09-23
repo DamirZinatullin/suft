@@ -20,4 +20,13 @@ func main() {
 	for _, schedule := range schedules {
 		fmt.Printf("%#v\n", schedule)
 	}
+
+	schedules, err = client.Schedules(&api.Options{Page: 1, Size: 2})
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Printf("\nСписок расписаний при передаче опций\n")
+	for _, schedule := range schedules {
+		fmt.Printf("%#v\n", schedule)
+	}
 }
