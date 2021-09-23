@@ -151,12 +151,12 @@ func main() {
 				return nil
 			}},
 		{
-			Name:        "LoggingTimeList, lts" ,
+			Name:        "LoggingTimeList" ,
 			Usage:       "Список временных затрат",
 			Description: "Для вывода списка временных затрат необходимо передать Id расписания",
 			Flags: []cli.Flag{
 				cli.IntFlag{
-					Name: "schedid, id",
+					Name: "scheduleId, id",
 					Usage: "Id расписания",
 					Required: true,
 					Destination: &scheduleId,
@@ -172,21 +172,18 @@ func main() {
 				if err != nil {
 					return err
 				}
-				//periodIdInt, err := strconv.Atoi(c.Args().First())
-				//if err != nil {
-				//	return errors.New("required to pass valid periodID")
-				//}
 				scheduleId := api.ScheduleId(scheduleId)
-				schedule, err := client.LoggingTimeList(scheduleId, nil)
+				loggingTimeList, err := client.LoggingTimeList(scheduleId, nil)
 				if err != nil {
 					return err
 				}
-				scheduleJSON, err := json.Marshal(schedule)
-				if err != nil {
-					return err
+				for _, schedule := range loggingTimeList {
+					loggingTimeJSON, err := json.Marshal(schedule)
+					if err != nil {
+						return err
+					}
+					fmt.Printf("\n%s\n", loggingTimeJSON)
 				}
-				fmt.Printf("%s\n", scheduleJSON)
-
 				return nil
 			}},
 	}
@@ -316,7 +313,7 @@ func refreshConfig() error {
 	}
 	token, err := auth.Refresh(userConf.Token.RefreshToken)
 	if err != nil {
-		return err
+		return errors.New("время сессии истекло, пройдите аутентификацию, выполнив команду login")
 	}
 	err = writeConfig(token)
 	if err != nil {
