@@ -12,9 +12,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"suft_sdk/internal/auth"
+	logging_time "suft_sdk/internal/logging-time"
 	api "suft_sdk/pkg/api"
 	"syscall"
 	"time"
@@ -27,6 +29,7 @@ type userConfig struct {
 
 const configFileName string = "suft_config.json"
 const configDirName string = "suft"
+const loggingTimeFileName string = "logging_time.json"
 
 var scheduleId int
 var loggingTimeId int
@@ -285,6 +288,50 @@ func main() {
 				fmt.Printf("%s\n\n", loggingTimeJSON)
 				return nil
 			}},
+		{
+			Name:     "addLoggingTime",
+			Usage:    "Добавление временной затраты",
+			Category: "Временные затраты",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:        "scheduleId, scid",
+					Usage:       "Id расписания",
+					Required:    true,
+					Destination: &scheduleId,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
+				client, err := newClientFromConfig()
+				if err != nil {
+					return err
+				}
+				path, err := genLoggingTimeFile()
+				if err != nil {
+					return err
+				}
+				cmd := exec.Command("vim", fmt.Sprintf("%s", path))
+				cmd.Stdin = os.Stdin
+				cmd.Stdout = os.Stdout
+				err = cmd.Run()
+				scheduleId := api.ScheduleId(scheduleId)
+				loggingTime, err := loggingTimeFromFIle()
+
+				loggingTimeResp, err := client.AddLoggingTime(scheduleId, loggingTime)
+				if err != nil {
+					return err
+				}
+				LoggingTimeJSON, err := json.Marshal(loggingTimeResp)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("%s\n", LoggingTimeJSON)
+
+				return nil
+			}},
 	}
 	err := app.Run(os.Args)
 	if err != nil {
@@ -434,6 +481,73 @@ func configExists() (bool, error) {
 
 }
 
-func genScheduleFile(client api.Client) error {
-	return nil
+func genLoggingTimeFile() (path string, err error) {
+	var output *os.File
+	filePath, err := loggingTimeFilePath()
+	fmt.Println(filePath)
+	if err != nil {
+		return "", err
+	}
+	_, err = os.Stat(filePath)
+	if err != nil {
+		output, err = os.Create(filePath)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		output, err = os.OpenFile(filePath, os.O_RDWR, os.ModePerm)
+		if err != nil {
+			return "", err
+		}
+	}
+	defer output.Close()
+	jsonEncoder := json.NewEncoder(output)
+	loggingTime := logging_time.AddLoggingTime{
+		CommentEmployee: "",
+		Day1Time:        0,
+		Day2Time:        0,
+		Day3Time:        0,
+		Day4Time:        0,
+		Day5Time:        0,
+		Day6Time:        0,
+		Day7Time:        0,
+		ProjectId:       0,
+		Task:            "",
+		WorkKindId:      0,
+	}
+	err = jsonEncoder.Encode(loggingTime)
+	if err != nil {
+		return "", err
+	}
+	return filePath, nil
+}
+
+func loggingTimeFilePath() (filePath string, err error) {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+	filePath = path.Join(configDir, configDirName, loggingTimeFileName)
+	return filePath, nil
+
+}
+
+
+
+func loggingTimeFromFIle() (loggingTime *logging_time.AddLoggingTime, err error) {
+	path, err := loggingTimeFilePath()
+	if err != nil {
+		return nil, err
+	}
+	_, err = os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	logTime := logging_time.AddLoggingTime{}
+	err = json.Unmarshal(data, &logTime)
+	return &logTime, nil
 }
