@@ -9,6 +9,10 @@ type status string
 
 const Approved status = "УТВ"
 const Denied status = "ОТКЛ"
+const Created status = "СЗ"
+const ToApprove status = "НУ"
+const ToApproveAgain status = "НП"
+const Corrected status = "СК"
 
 type TimeLoggerInterface interface {
 	Validate()

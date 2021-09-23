@@ -291,7 +291,7 @@ func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTim
 		return nil, err
 	}
 	URN := fmt.Sprintf("%s/%d/%s/%d", SchedulesURN, scheduleId, LoggingTimeURN, loggingTimeId)
-	resp, err := c.doHTTP(http.MethodPut, URN, reqB)
+	resp, err := c.doHTTP(http.MethodPatch, URN, reqB)
 	if err != nil {
 		return nil, err
 	}

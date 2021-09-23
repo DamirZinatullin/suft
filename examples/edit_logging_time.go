@@ -17,7 +17,7 @@ func main() {
 		Day1Time:        0,
 		Day2Time:        0,
 		Day3Time:        0,
-		Day4Time:        1,
+		Day4Time:        0,
 		Day5Time:        0,
 		Day6Time:        0,
 		Day7Time:        0,
@@ -44,12 +44,12 @@ func main() {
 		Day6Time:             0,
 		Day7Time:             0,
 		ProjectId:            8028,
-		StatusCode:           logging_time.Denied,
+		StatusCode:           logging_time.Approved,
 		Task:                 "",
 		WorkKindId:           21,
 	}
 
-	loggingTime, err := client.EditLoggingTime(32907, 327801, &loggingTimeEdit)
+	loggingTime, err := client.EditLoggingTime(32907, 327806, &loggingTimeEdit)
 	if err != nil {
 		log.Fatalln(err)
 	}
