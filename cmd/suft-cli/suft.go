@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 	"suft_sdk/internal/auth"
 	api "suft_sdk/pkg/api"
@@ -31,6 +30,7 @@ const configDirName string = "suft"
 
 var scheduleId int
 var loggingTimeId int
+var periodId int
 var page int
 var size int
 var role string
@@ -123,6 +123,14 @@ func main() {
 			Name:     "schedule",
 			Usage:    "Детализация расписания",
 			Category: "Расписания",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:        "scheduleId, scid",
+					Usage:       "Id расписания",
+					Required:    true,
+					Destination: &scheduleId,
+				},
+			},
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
 				if err != nil {
@@ -132,11 +140,7 @@ func main() {
 				if err != nil {
 					return err
 				}
-				schedIdInt, err := strconv.Atoi(c.Args().First())
-				if err != nil {
-					return errors.New("required to pass valid scheduleID")
-				}
-				schedId := api.ScheduleId(schedIdInt)
+				schedId := api.ScheduleId(scheduleId)
 
 				schedule, err := client.DetailSchedule(schedId)
 				if err != nil {
@@ -153,8 +157,16 @@ func main() {
 		{
 			Name:        "addSchedule",
 			Usage:       "Добавление расписания",
-			Description: "Для добавления расписания необходимо передать Id периуда",
+			Description: "Для добавления расписания необходимо передать id периуда",
 			Category:    "Расписания",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:        "periodId, id",
+					Usage:       "Id периуда",
+					Required:    true,
+					Destination: &periodId,
+				},
+			},
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
 				if err != nil {
@@ -164,11 +176,8 @@ func main() {
 				if err != nil {
 					return err
 				}
-				periodIdInt, err := strconv.Atoi(c.Args().First())
-				if err != nil {
-					return errors.New("required to pass valid periodID")
-				}
-				periodId := api.PeriodId(periodIdInt)
+
+				periodId := api.PeriodId(periodId)
 
 				schedule, err := client.AddSchedule(periodId)
 				if err != nil {
@@ -188,7 +197,7 @@ func main() {
 			Description: "Для вывода списка временных затрат необходимо передать Id расписания",
 			Flags: []cli.Flag{
 				cli.IntFlag{
-					Name:        "scheduleId, id",
+					Name:        "scheduleId, scid",
 					Usage:       "Id расписания",
 					Required:    true,
 					Destination: &scheduleId,
