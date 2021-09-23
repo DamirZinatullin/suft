@@ -196,18 +196,13 @@ func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *Options) ([]log
 		log.Println(err)
 		return nil, err
 	}
-
 	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("LoggingTimeList: unable to get logging-times")
-	}
-
 	respB, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("LoggingTimeList: unable to read response body:", err)
 		return nil, err
 	}
+
 	loggingTimes := []logging_time.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTimes)
 	if err != nil {

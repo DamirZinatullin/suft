@@ -29,7 +29,7 @@ type userConfig struct {
 const configFileName string = "suft_config.json"
 const configDirName string = "suft"
 
-var scheduleId string
+var scheduleId int
 
 func main() {
 	app := cli.NewApp()
@@ -139,6 +139,45 @@ func main() {
 				periodId := api.PeriodId(periodIdInt)
 
 				schedule, err := client.AddSchedule(periodId)
+				if err != nil {
+					return err
+				}
+				scheduleJSON, err := json.Marshal(schedule)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("%s\n", scheduleJSON)
+
+				return nil
+			}},
+		{
+			Name:        "LoggingTimeList, lts" ,
+			Usage:       "Список временных затрат",
+			Description: "Для вывода списка временных затрат необходимо передать Id расписания",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name: "schedid, id",
+					Usage: "Id расписания",
+					Required: true,
+					Destination: &scheduleId,
+				},
+			},
+			Category:    "Временные затраты",
+			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
+				client, err := newClientFromConfig()
+				if err != nil {
+					return err
+				}
+				//periodIdInt, err := strconv.Atoi(c.Args().First())
+				//if err != nil {
+				//	return errors.New("required to pass valid periodID")
+				//}
+				scheduleId := api.ScheduleId(scheduleId)
+				schedule, err := client.LoggingTimeList(scheduleId, nil)
 				if err != nil {
 					return err
 				}
