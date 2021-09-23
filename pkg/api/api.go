@@ -32,6 +32,11 @@ type Options struct {
 	CreatorApprover Role `json:"creator_approver"`
 }
 
+type OptionsLT struct {
+	Page            int  `json:"page"`
+	Size            int  `json:"size"`
+}
+
 type ScheduleId int
 type LoggingTimeId int
 type PeriodId int
@@ -40,7 +45,7 @@ type API interface {
 	Schedules(options *Options) ([]schedule.Schedule, error)
 	AddSchedule(periodId PeriodId) (*schedule.Schedule, error)
 	DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
-	LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error)
+	LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]logging_time.LoggingTime, error)
 	AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) (*logging_time.LoggingTime, error)
 	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*logging_time.LoggingTime, error)
 	EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime)
@@ -91,9 +96,15 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 	size := 5
 	creatorApprover := Creator
 	if options != nil {
-		page = options.Page
-		size = options.Size
-		creatorApprover = options.CreatorApprover
+		if options.Page != 0{
+			page = options.Page
+		}
+		if options.Size != 0{
+			size = options.Size
+		}
+		if options.CreatorApprover != ""{
+			creatorApprover = options.CreatorApprover
+		}
 	}
 	URN := fmt.Sprint(SchedulesURN, "?page=", page, "&size=", size, "&creatorApprover=", creatorApprover)
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
@@ -178,14 +189,17 @@ func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, erro
 	return &schedule, nil
 }
 
-func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *Options) ([]logging_time.LoggingTime, error) {
+func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]logging_time.LoggingTime, error) {
 	page := 1
 	size := 5
 	if options != nil {
-		page = options.Page
-		size = options.Size
+		if options.Page != 0{
+			page = options.Page
+		}
+		if options.Size != 0{
+			size = options.Size
+		}
 	}
-
 	URN := fmt.Sprintf("%s/%d/%s?page=%d&size=%d", SchedulesURN, scheduleId, LoggingTimeURN, page, size)
 
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
