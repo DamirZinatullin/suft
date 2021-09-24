@@ -26,6 +26,12 @@ const (
 
 type Role string
 
+type HttpClient interface {
+	Do(r *http.Request) (*http.Response, error)
+}
+
+var httpClient HttpClient
+
 type Options struct {
 	Page            int  `json:"page"`
 	Size            int  `json:"size"`
@@ -58,7 +64,7 @@ type Client struct {
 	BaseURL      string
 	AccessToken  string
 	RefreshToken string
-	HttpClient   *http.Client
+	HttpClient   HttpClient
 }
 
 func NewClient(email string, password string) (API, error) {
@@ -66,13 +72,14 @@ func NewClient(email string, password string) (API, error) {
 	if err != nil {
 		return nil, err
 	}
+	httpClient = &http.Client{
+		Timeout: time.Minute,
+	}
 	return &Client{
 		BaseURL:      BaseURL,
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
-		HttpClient: &http.Client{
-			Timeout: time.Minute,
-		},
+		HttpClient: httpClient,
 	}, nil
 }
 
