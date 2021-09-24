@@ -70,7 +70,7 @@ func main() {
 				return nil
 			}},
 		{
-			Name:     "schedules",
+			Name:     "scs",
 			Usage:    "Список расписаний",
 			Category: "Расписания",
 			Flags: []cli.Flag{
@@ -125,7 +125,7 @@ func main() {
 				return nil
 			}},
 		{
-			Name:     "schedule",
+			Name:     "sc",
 			Usage:    "Детализация расписания",
 			Category: "Расписания",
 			Flags: []cli.Flag{
@@ -160,7 +160,7 @@ func main() {
 				return nil
 			}},
 		{
-			Name:        "addSchedule",
+			Name:        "addsc",
 			Usage:       "Добавление расписания",
 			Description: "Для добавления расписания необходимо передать id периуда",
 			Category:    "Расписания",
@@ -197,7 +197,7 @@ func main() {
 				return nil
 			}},
 		{
-			Name:        "LoggingTimeList",
+			Name:        "lts",
 			Usage:       "Список временных затрат",
 			Description: "Для вывода списка временных затрат необходимо передать Id расписания",
 			Flags: []cli.Flag{
@@ -250,7 +250,7 @@ func main() {
 				return nil
 			}},
 		{
-			Name:        "loggingTime",
+			Name:        "lt",
 			Usage:       "Детализация временных затрат",
 			Description: "Для вывода временной затраты необходимо передать Id расписания и Id временой затраты",
 			Flags: []cli.Flag{
@@ -291,7 +291,7 @@ func main() {
 				return nil
 			}},
 		{
-			Name:     "addLoggingTime",
+			Name:     "addlt",
 			Usage:    "Добавление временной затраты",
 			Category: "Временные затраты",
 			Flags: []cli.Flag{
@@ -340,6 +340,43 @@ func main() {
 
 				return nil
 			}},
+		{
+			Name:     "rmlt",
+			Usage:    "Удаление временной затраты",
+			Category: "Временные затраты",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:        "scheduleId, scid",
+					Usage:       "Id расписания",
+					Required:    true,
+					Destination: &scheduleId,
+				},
+				cli.IntFlag{
+					Name:        "loggingTimeId, ltid",
+					Usage:       "Id временной затраты",
+					Required:    true,
+					Destination: &loggingTimeId,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
+				client, err := newClientFromConfig()
+				if err != nil {
+					return err
+				}
+				scheduleId := api.ScheduleId(scheduleId)
+				loggingTimeId := api.LoggingTimeId(loggingTimeId)
+				err = client.DeleteLoggingTime(scheduleId, loggingTimeId)
+				if err != nil {
+					return err
+				}
+				fmt.Println("Временная затрата успешно удалена")
+				return nil
+			}},
+
 	}
 	err := app.Run(os.Args)
 	if err != nil {
