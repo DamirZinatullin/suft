@@ -12,10 +12,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	loggingTime, err := client.DetailLoggingTime(32907, 327702)
+	loggingTime, err := client.DetailLoggingTime(32907, 327703)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	fmt.Printf("Подробная информация по LoggingTime\n")
-	fmt.Println(loggingTime)
+	fmt.Printf("%#v\n\n", *loggingTime)
+
 }

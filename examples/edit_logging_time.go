@@ -33,6 +33,7 @@ func main() {
 	fmt.Printf("Добавлен LoggingTime:\n")
 	fmt.Printf("%#v\n\n", *loggingTimeCreated)
 
+	logTimeId := api.LoggingTimeId(loggingTimeCreated.Id)
 	loggingTimeEdit := logging_time.EditLoggingTime{
 		CommentAdminEmployee: "Комментарий админа",
 		CommentEmployee:      "Комментарий сотрудника",
@@ -49,7 +50,7 @@ func main() {
 		WorkKindId:           21,
 	}
 
-	loggingTime, err := client.EditLoggingTime(32907, 327806, &loggingTimeEdit)
+	loggingTime, err := client.EditLoggingTime(32907, logTimeId, &loggingTimeEdit)
 	if err != nil {
 		log.Fatalln(err)
 	}
