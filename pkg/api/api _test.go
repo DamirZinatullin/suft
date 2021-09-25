@@ -135,7 +135,6 @@ func TestSchedulesError(t *testing.T) {
 	assert.Nil(t, schedules)
 }
 
-
 func TestAddScheduleSuccess(t *testing.T) {
 	client, err := NewFakeClient()
 	if err != nil {
@@ -168,8 +167,6 @@ func TestAddScheduleError(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, scheduleResp)
 }
-
-
 
 func TestDetailScheduleSuccess(t *testing.T) {
 	client, err := NewFakeClient()
@@ -204,14 +201,13 @@ func TestDetailScheduleError(t *testing.T) {
 	assert.Nil(t, scheduleResp)
 }
 
-
 func TestLoggingTimeListSuccess(t *testing.T) {
 	client, err := NewFakeClient()
 	GetRequireResp = SuccessRespLoggingTimeList
 	if err != nil {
 		log.Fatalln(err)
 	}
-	loggingTimeList, err := client.LoggingTimeList(777,&OptionsLT{
+	loggingTimeList, err := client.LoggingTimeList(777, &OptionsLT{
 		Page: 5,
 		Size: 5,
 	})
@@ -241,7 +237,71 @@ func TestLoggingTimeListError(t *testing.T) {
 	assert.Nil(t, loggingTimeList)
 }
 
+func TestAddLoggingTimeSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = SuccessRespAddLoggingTime
+	loggingTimeResp, err := client.AddLoggingTime(777, &logging_time.AddLoggingTime{})
+	require.NoError(t, err)
+	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
+}
 
+func TestAddLoggingTimeUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	loggingTimeResp, err := client.AddLoggingTime(5, &logging_time.AddLoggingTime{})
+	assert.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
+
+func TestAddLoggingTimeError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	loggingTimeResp, err := client.AddLoggingTime(5, &logging_time.AddLoggingTime{})
+	require.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
+
+func TestDetailLoggingTimeSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = SuccessRespDetailLoggingTime
+	loggingTimeResp, err := client.DetailLoggingTime(777, 777)
+	require.NoError(t, err)
+	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
+}
+
+func TestDetailLoggingTimeUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	loggingTimeResp, err := client.DetailLoggingTime(5, 777)
+	assert.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
+
+func TestDetailLoggingTimeError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	loggingTimeResp, err := client.DetailLoggingTime(5, 777)
+	require.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
 
 func NewFakeClient() (*Client, error) {
 	httpClient = new(mockedHttpClient)
@@ -262,7 +322,6 @@ func SuccessRespSchedules() (*http.Response, error) {
 	return &resp, nil
 }
 
-
 func UnauthorizedResp() (*http.Response, error) {
 	respB := []byte("Unauthorized")
 	body := ioutil.NopCloser(bytes.NewReader(respB))
@@ -275,7 +334,7 @@ func ErrorRespFromDoHttp() (*http.Response, error) {
 	return nil, errors.New("error from doHTTP")
 }
 
-func SuccessRespAddSchedule()(*http.Response, error){
+func SuccessRespAddSchedule() (*http.Response, error) {
 	schedule := fakeSchedule1
 	respB, _ := json.Marshal(schedule)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
@@ -284,7 +343,7 @@ func SuccessRespAddSchedule()(*http.Response, error){
 	return &resp, nil
 }
 
-func SuccessRespDetailSchedule()(*http.Response, error){
+func SuccessRespDetailSchedule() (*http.Response, error) {
 	schedule := fakeSchedule1
 	respB, _ := json.Marshal(schedule)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
@@ -293,10 +352,27 @@ func SuccessRespDetailSchedule()(*http.Response, error){
 	return &resp, nil
 }
 
-
 func SuccessRespLoggingTimeList() (*http.Response, error) {
 	schedules := []logging_time.LoggingTime{fakeLoggingTime1, fakeLoggingTime2}
 	respB, _ := json.Marshal(schedules)
+	body := ioutil.NopCloser(bytes.NewReader(respB))
+	resp := http.Response{StatusCode: 200,
+		Body: body}
+	return &resp, nil
+}
+
+func SuccessRespAddLoggingTime() (*http.Response, error) {
+	loggingTime := fakeLoggingTime1
+	respB, _ := json.Marshal(loggingTime)
+	body := ioutil.NopCloser(bytes.NewReader(respB))
+	resp := http.Response{StatusCode: 201,
+		Body: body}
+	return &resp, nil
+}
+
+func SuccessRespDetailLoggingTime() (*http.Response, error) {
+	loggingTime := fakeLoggingTime1
+	respB, _ := json.Marshal(loggingTime)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
 		Body: body}
