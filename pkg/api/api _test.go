@@ -75,10 +75,10 @@ func TestSchedulesUnauthorized(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	GetRequireResp = UnauthorizedRespSchedules
+	GetRequireResp = UnauthorizedResp
 	schedules, err := client.Schedules(nil)
 	assert.Error(t, err)
-	assert.Equal(t, []schedule.Schedule(nil), schedules)//Непонятно почему не nil
+	assert.Nil(t, schedules)
 }
 
 func TestSchedulesError(t *testing.T) {
@@ -86,10 +86,10 @@ func TestSchedulesError(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	GetRequireResp = ErrorRespSchedules
+	GetRequireResp = ErrorRespFromDoHttp
 	schedules, err := client.Schedules(nil)
 	require.Error(t, err)
-	assert.Equal(t, []schedule.Schedule(nil), schedules)
+	assert.Nil(t, schedules)
 }
 
 
@@ -104,6 +104,62 @@ func TestAddScheduleSuccess(t *testing.T) {
 	assert.Equal(t, &fakeSchedule1, schedule)
 }
 
+func TestAddScheduleUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	schedule, err := client.AddSchedule(5)
+	assert.Error(t, err)
+	assert.Nil(t, schedule)
+}
+
+func TestAddScheduleError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	scheduleResp, err := client.AddSchedule(5)
+	require.Error(t, err)
+	assert.Nil(t, scheduleResp)
+}
+
+
+
+func TestDetailScheduleSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = SuccessRespDetailSchedule
+	schedule, err := client.DetailSchedule(777)
+	require.NoError(t, err)
+	assert.Equal(t, &fakeSchedule1, schedule)
+}
+
+func TestDetailScheduleUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	schedule, err := client.DetailSchedule(777)
+	assert.Error(t, err)
+	assert.Nil(t, schedule)
+}
+
+func TestDetailScheduleError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	scheduleResp, err := client.DetailSchedule(777)
+	require.Error(t, err)
+	assert.Nil(t, scheduleResp)
+}
 
 func NewFakeClient() (*Client, error) {
 	httpClient = new(mockedHttpClient)
@@ -125,7 +181,7 @@ func SuccessRespSchedules() (*http.Response, error) {
 }
 
 
-func UnauthorizedRespSchedules() (*http.Response, error) {
+func UnauthorizedResp() (*http.Response, error) {
 	respB := []byte("Unauthorized")
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: http.StatusUnauthorized,
@@ -133,7 +189,7 @@ func UnauthorizedRespSchedules() (*http.Response, error) {
 	return &resp, nil
 }
 
-func ErrorRespSchedules() (*http.Response, error) {
+func ErrorRespFromDoHttp() (*http.Response, error) {
 	return nil, errors.New("error from doHTTP")
 }
 
@@ -142,6 +198,15 @@ func SuccessRespAddSchedule()(*http.Response, error){
 	respB, _ := json.Marshal(schedule)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 201,
+		Body: body}
+	return &resp, nil
+}
+
+func SuccessRespDetailSchedule()(*http.Response, error){
+	schedule := fakeSchedule1
+	respB, _ := json.Marshal(schedule)
+	body := ioutil.NopCloser(bytes.NewReader(respB))
+	resp := http.Response{StatusCode: 200,
 		Body: body}
 	return &resp, nil
 }
