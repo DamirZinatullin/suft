@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	logging_time "suft_sdk/internal/logging-time"
 	"suft_sdk/internal/schedule"
 	"testing"
 )
@@ -51,6 +52,44 @@ var fakeSchedule2 = schedule.Schedule{
 	StatusCode: "25",
 }
 
+var fakeLoggingTime1 = logging_time.LoggingTime{
+	AdminEmployee:        schedule.Employee{},
+	CommentAdminEmployee: "fake comment from Admin",
+	CommentEmployee:      "fake comment from Employee",
+	Day1Time:             1,
+	Day2Time:             2,
+	Day3Time:             1,
+	Day4Time:             0,
+	Day5Time:             1,
+	Day6Time:             0,
+	Day7Time:             0,
+	Id:                   0,
+	ImportedFrom:         "fake1",
+	ProjectId:            0,
+	StatusCode:           "fake1",
+	Task:                 "fake1",
+	WorkKindId:           0,
+}
+
+var fakeLoggingTime2 = logging_time.LoggingTime{
+	AdminEmployee:        schedule.Employee{},
+	CommentAdminEmployee: "fake comment from Admin2",
+	CommentEmployee:      "fake comment from Employee2",
+	Day1Time:             2,
+	Day2Time:             1,
+	Day3Time:             2,
+	Day4Time:             0,
+	Day5Time:             1,
+	Day6Time:             0,
+	Day7Time:             0,
+	Id:                   0,
+	ImportedFrom:         "fake2",
+	ProjectId:            0,
+	StatusCode:           "fake2",
+	Task:                 "fake2",
+	WorkKindId:           0,
+}
+
 var GetRequireResp func() (*http.Response, error)
 
 type mockedHttpClient struct{}
@@ -65,7 +104,11 @@ func TestSchedulesSuccess(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	schedules, err := client.Schedules(nil)
+	schedules, err := client.Schedules(&Options{
+		Page:            7,
+		Size:            7,
+		CreatorApprover: "fake",
+	})
 	require.NoError(t, err)
 	assert.Equal(t, []schedule.Schedule{fakeSchedule1, fakeSchedule2}, schedules)
 }
@@ -161,6 +204,45 @@ func TestDetailScheduleError(t *testing.T) {
 	assert.Nil(t, scheduleResp)
 }
 
+
+func TestLoggingTimeListSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	GetRequireResp = SuccessRespLoggingTimeList
+	if err != nil {
+		log.Fatalln(err)
+	}
+	loggingTimeList, err := client.LoggingTimeList(777,&OptionsLT{
+		Page: 5,
+		Size: 5,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, []logging_time.LoggingTime{fakeLoggingTime1, fakeLoggingTime2}, loggingTimeList)
+}
+
+func TestLoggingTimeListUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	loggingTimeList, err := client.LoggingTimeList(777, nil)
+	assert.Error(t, err)
+	assert.Nil(t, loggingTimeList)
+}
+
+func TestLoggingTimeListError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	loggingTimeList, err := client.LoggingTimeList(777, nil)
+	require.Error(t, err)
+	assert.Nil(t, loggingTimeList)
+}
+
+
+
 func NewFakeClient() (*Client, error) {
 	httpClient = new(mockedHttpClient)
 	return &Client{
@@ -205,6 +287,16 @@ func SuccessRespAddSchedule()(*http.Response, error){
 func SuccessRespDetailSchedule()(*http.Response, error){
 	schedule := fakeSchedule1
 	respB, _ := json.Marshal(schedule)
+	body := ioutil.NopCloser(bytes.NewReader(respB))
+	resp := http.Response{StatusCode: 200,
+		Body: body}
+	return &resp, nil
+}
+
+
+func SuccessRespLoggingTimeList() (*http.Response, error) {
+	schedules := []logging_time.LoggingTime{fakeLoggingTime1, fakeLoggingTime2}
+	respB, _ := json.Marshal(schedules)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
 		Body: body}
