@@ -370,6 +370,14 @@ func SuccessRespAddLoggingTime() (*http.Response, error) {
 	return &resp, nil
 }
 
+func SuccessRespDeleteLoggingTime() (*http.Response, error) {
+	respB := []byte("OK")
+	body := ioutil.NopCloser(bytes.NewReader(respB))
+	resp := http.Response{StatusCode: 200,
+		Body: body}
+	return &resp, nil
+}
+
 func SuccessRespDetailLoggingTime() (*http.Response, error) {
 	loggingTime := fakeLoggingTime1
 	respB, _ := json.Marshal(loggingTime)
@@ -377,4 +385,68 @@ func SuccessRespDetailLoggingTime() (*http.Response, error) {
 	resp := http.Response{StatusCode: 200,
 		Body: body}
 	return &resp, nil
+}
+
+func TestEditLoggingTimeSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = SuccessRespDetailLoggingTime
+	loggingTimeResp, err := client.EditLoggingTime(777, 777, &logging_time.EditLoggingTime{})
+	require.NoError(t, err)
+	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
+}
+
+func TestEditLoggingTimeUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	loggingTimeResp, err := client.EditLoggingTime(777, 777, &logging_time.EditLoggingTime{})
+	assert.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
+
+func TestEditLoggingTimeError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	loggingTimeResp, err := client.EditLoggingTime(777, 777, &logging_time.EditLoggingTime{})
+	require.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
+
+func TestDeleteLoggingTimeSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = SuccessRespDeleteLoggingTime
+	err = client.DeleteLoggingTime(777, 777)
+	require.NoError(t, err)
+
+}
+
+func TestDeleteLoggingTimeUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	err = client.DeleteLoggingTime(777, 777)
+	assert.Error(t, err)
+}
+
+func TestDeleteLoggingTimeError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	err = client.DeleteLoggingTime(777, 777)
+	require.Error(t, err)
 }
