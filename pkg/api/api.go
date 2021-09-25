@@ -139,12 +139,10 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 }
 
 func (c *Client) AddSchedule(periodId PeriodId) (*schedule.Schedule, error) {
-
-	reqS := fmt.Sprintf(
-		`{
-   "periodId": %d
-}`, periodId)
-	reqB := []byte(reqS)
+	peiodIdStruct := struct {
+		PeriodId `json:"periodId"`
+	}{periodId}
+	reqB, err := json.Marshal(peiodIdStruct)
 	resp, err := c.doHTTP(http.MethodPost, SchedulesURN, reqB)
 	if err != nil {
 		return nil, err
