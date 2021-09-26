@@ -40,6 +40,39 @@ var size int
 var role string
 var editor string
 
+var scheduleIdFlag cli.Flag = cli.IntFlag{
+	Name:        "schedule-id, scid",
+	Usage:       "Id расписания",
+	Required:    true,
+	Destination: &scheduleId,
+}
+
+var pageFlag cli.Flag = cli.IntFlag{
+	Name:        "page, p",
+	Usage:       "Страница отображения",
+	Destination: &page,
+}
+
+var sizeFlag cli.Flag = cli.IntFlag{
+	Name:        "size, s",
+	Usage:       "Количество отображаемых элементов",
+	Destination: &size,
+}
+
+var periodFlag cli.Flag = cli.IntFlag{
+	Name:        "period-id, pid",
+	Usage:       "Id периуда",
+	Required:    true,
+	Destination: &periodId,
+}
+
+var loggingTimeIdFlag cli.Flag = cli.IntFlag{
+	Name:        "logging-time-id, ltid",
+	Usage:       "Id временной затраты",
+	Required:    true,
+	Destination: &loggingTimeId,
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "SUFT CLI"
@@ -49,6 +82,7 @@ func main() {
 			Name:     "login",
 			Usage:    "Аутентификация клиента",
 			Category: "Клиент",
+			Aliases:  []string{"ln"},
 			Action: func(c *cli.Context) error {
 				err := loginSuft()
 				if err != nil {
@@ -61,6 +95,7 @@ func main() {
 			Name:     "logout",
 			Usage:    "Выход из клиента",
 			Category: "Клиент",
+			Aliases:  []string{"lt"},
 			Action: func(c *cli.Context) error {
 				err := logoutSuft()
 				if err != nil {
@@ -70,9 +105,10 @@ func main() {
 				return nil
 			}},
 		{
-			Name:     "scs",
+			Name:     "schedules",
 			Usage:    "Список расписаний",
 			Category: "Расписания",
+			Aliases:  []string{"scs"},
 			Flags: []cli.Flag{
 				cli.IntFlag{
 					Name:        "page, p",
@@ -125,16 +161,12 @@ func main() {
 				return nil
 			}},
 		{
-			Name:     "sc",
+			Name:     "schedule",
 			Usage:    "Детализация расписания",
+			Aliases:  []string{"sc"},
 			Category: "Расписания",
 			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:        "scheduleId, scid",
-					Usage:       "Id расписания",
-					Required:    true,
-					Destination: &scheduleId,
-				},
+				scheduleIdFlag,
 			},
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
@@ -160,17 +192,13 @@ func main() {
 				return nil
 			}},
 		{
-			Name:        "addsc",
+			Name:        "add-schedule",
 			Usage:       "Добавление расписания",
 			Description: "Для добавления расписания необходимо передать id периуда",
 			Category:    "Расписания",
+			Aliases:     []string{"addsc"},
 			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:        "periodId, id",
-					Usage:       "Id периуда",
-					Required:    true,
-					Destination: &periodId,
-				},
+				periodFlag,
 			},
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
@@ -197,26 +225,14 @@ func main() {
 				return nil
 			}},
 		{
-			Name:        "lts",
+			Name:        "logging-times",
 			Usage:       "Список временных затрат",
+			Aliases:     []string{"lts"},
 			Description: "Для вывода списка временных затрат необходимо передать Id расписания",
 			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:        "scheduleId, scid",
-					Usage:       "Id расписания",
-					Required:    true,
-					Destination: &scheduleId,
-				},
-				cli.IntFlag{
-					Name:        "page, p",
-					Usage:       "Страница отображения",
-					Destination: &page,
-				},
-				cli.IntFlag{
-					Name:        "size, s",
-					Usage:       "Количество отображаемых элементов",
-					Destination: &size,
-				},
+				scheduleIdFlag,
+				pageFlag,
+				sizeFlag,
 			},
 			Category: "Временные затраты",
 			Action: func(c *cli.Context) error {
@@ -250,22 +266,13 @@ func main() {
 				return nil
 			}},
 		{
-			Name:        "lt",
-			Usage:       "Детализация временных затрат",
+			Name:        "logging-time",
+			Usage:       "Детализация временной затраты",
 			Description: "Для вывода временной затраты необходимо передать Id расписания и Id временой затраты",
+			Aliases:     []string{"lt"},
 			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:        "scheduleId, scid",
-					Usage:       "Id расписания",
-					Required:    true,
-					Destination: &scheduleId,
-				},
-				cli.IntFlag{
-					Name:        "loggingTimeId, ltid",
-					Usage:       "Id временной затраты",
-					Required:    true,
-					Destination: &loggingTimeId,
-				},
+				scheduleIdFlag,
+				loggingTimeIdFlag,
 			},
 			Category: "Временные затраты",
 			Action: func(c *cli.Context) error {
@@ -291,16 +298,12 @@ func main() {
 				return nil
 			}},
 		{
-			Name:     "addlt",
+			Name:     "add-logging-time",
 			Usage:    "Добавление временной затраты",
 			Category: "Временные затраты",
+			Aliases:  []string{"addlt"},
 			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:        "scheduleId, scid",
-					Usage:       "Id расписания",
-					Required:    true,
-					Destination: &scheduleId,
-				},
+				scheduleIdFlag,
 				cli.StringFlag{
 					Name:        "editor, e",
 					Usage:       "Используемый текстовый редактор",
@@ -341,22 +344,13 @@ func main() {
 				return nil
 			}},
 		{
-			Name:     "rmlt",
+			Name:     "remove-logging-time",
 			Usage:    "Удаление временной затраты",
 			Category: "Временные затраты",
+			Aliases:  []string{"rmlt"},
 			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:        "scheduleId, scid",
-					Usage:       "Id расписания",
-					Required:    true,
-					Destination: &scheduleId,
-				},
-				cli.IntFlag{
-					Name:        "loggingTimeId, ltid",
-					Usage:       "Id временной затраты",
-					Required:    true,
-					Destination: &loggingTimeId,
-				},
+				scheduleIdFlag,
+				loggingTimeIdFlag,
 			},
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
