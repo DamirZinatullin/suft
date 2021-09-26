@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	logging_time "suft_sdk/internal/logging-time"
-	api "suft_sdk/pkg/api"
+	"suftsdk/internal/loggingtime"
+	"suftsdk/pkg/api"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	periodId := api.PeriodId(368)
+	periodId := api.PeriodId(371)
 	schedule, err := client1.AddSchedule(periodId)
 	if err != nil {
 		log.Fatalln(err)
@@ -21,8 +21,8 @@ func main() {
 	fmt.Println("Добавлено расписание")
 	fmt.Printf("%#v\n\n", *schedule)
 
-	loggingTime := logging_time.AddLoggingTime{
-		CommentEmployee: "test9",
+	loggingTime := loggingtime.AddLoggingTime{
+		CommentEmployee: "test10",
 		Day1Time:        1,
 		Day2Time:        1,
 		Day3Time:        0,
@@ -31,7 +31,7 @@ func main() {
 		Day6Time:        3,
 		Day7Time:        2,
 		ProjectId:       69753,
-		Task:            "test9",
+		Task:            "test10",
 		WorkKindId:      21,
 	}
 	loggingTimeCreated, err := client1.AddLoggingTime(api.ScheduleId(schedule.Id), &loggingTime)
@@ -47,6 +47,13 @@ func main() {
 	}
 	fmt.Println("Расписание, отправленное на утверждение")
 	fmt.Printf("%#v\n\n", *scheduleForApprove)
+
+	loggingTimeForApprove, err := client1.DetailLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Printf("Трудозатраты расписания, отправленного на утверждение\n")
+	fmt.Printf("%#v\n\n", *loggingTimeForApprove)
 
 	client2, err := api.NewClient("nikonovov", "147753")
 	if err != nil {

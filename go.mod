@@ -1,4 +1,4 @@
-module suft_sdk
+module suftsdk
 
 go 1.16
 

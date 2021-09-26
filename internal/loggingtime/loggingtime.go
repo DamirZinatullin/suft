@@ -1,9 +1,8 @@
-package logging_time
+package loggingtime
 
 import (
-	"suft_sdk/internal/schedule"
+	"suftsdk/internal/schedule"
 )
-
 
 type status string
 
@@ -38,7 +37,7 @@ type LoggingTime struct {
 }
 
 type AddLoggingTime struct {
-	CommentEmployee string `json:"commentEmployee"`
+	CommentEmployee string  `json:"commentEmployee"`
 	Day1Time        float64 `json:"day1Time"`
 	Day2Time        float64 `json:"day2Time"`
 	Day3Time        float64 `json:"day3Time"`
@@ -46,23 +45,23 @@ type AddLoggingTime struct {
 	Day5Time        float64 `json:"day5Time"`
 	Day6Time        float64 `json:"day6Time"`
 	Day7Time        float64 `json:"day7Time"`
-	ProjectId       int `json:"projectId"`
-	Task            string `json:"task"`
-	WorkKindId      int `json:"workKindId"`
+	ProjectId       int     `json:"projectId"`
+	Task            string  `json:"task"`
+	WorkKindId      int     `json:"workKindId"`
 }
 
 type EditLoggingTime struct {
-	CommentAdminEmployee string `json:"commentAdminEmployee"`
-	CommentEmployee      string `json:"commentEmployee"`
-	Day1Time        float64 `json:"day1Time"`
-	Day2Time        float64 `json:"day2Time"`
-	Day3Time        float64 `json:"day3Time"`
-	Day4Time        float64 `json:"day4Time"`
-	Day5Time        float64 `json:"day5Time"`
-	Day6Time        float64 `json:"day6Time"`
-	Day7Time        float64 `json:"day7Time"`
-	ProjectId            int `json:"projectId"`
-	StatusCode           status `json:"statusCode"`
-	Task                 string `json:"task"`
-	WorkKindId           int `json:"workKindId"`
+	CommentAdminEmployee string  `json:"commentAdminEmployee"`
+	CommentEmployee      string  `json:"commentEmployee"`
+	Day1Time             float64 `json:"day1Time"`
+	Day2Time             float64 `json:"day2Time"`
+	Day3Time             float64 `json:"day3Time"`
+	Day4Time             float64 `json:"day4Time"`
+	Day5Time             float64 `json:"day5Time"`
+	Day6Time             float64 `json:"day6Time"`
+	Day7Time             float64 `json:"day7Time"`
+	ProjectId            int     `json:"projectId"`
+	StatusCode           status  `json:"statusCode"`
+	Task                 string  `json:"task"`
+	WorkKindId           int     `json:"workKindId"`
 }
