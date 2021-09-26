@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/urfave/cli"
-	"golang.org/x/term"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -15,11 +13,14 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-	"suft_sdk/internal/auth"
-	logging_time "suft_sdk/internal/logging-time"
-	api "suft_sdk/pkg/api"
+	"suftsdk/internal/auth"
+	"suftsdk/internal/loggingtime"
+	"suftsdk/pkg/api"
 	"syscall"
 	"time"
+
+	"github.com/urfave/cli"
+	"golang.org/x/term"
 )
 
 type userConfig struct {
@@ -29,8 +30,7 @@ type userConfig struct {
 
 const configFileName string = "suft_config.json"
 const configDirName string = "suft"
-const loggingTimeFileName string = "logging_time.json"
-
+const loggingTimeFileName string = "loggingtime.json"
 
 var scheduleId int
 var loggingTimeId int
@@ -305,8 +305,8 @@ func main() {
 					Name:        "editor, e",
 					Usage:       "Используемый текстовый редактор",
 					Destination: &editor,
-					Value: "vim",
-					EnvVar: "EDITOR",
+					Value:       "vim",
+					EnvVar:      "EDITOR",
 				},
 			},
 			Action: func(c *cli.Context) error {
@@ -376,7 +376,6 @@ func main() {
 				fmt.Println("Временная затрата успешно удалена")
 				return nil
 			}},
-
 	}
 	err := app.Run(os.Args)
 	if err != nil {
@@ -547,7 +546,7 @@ func genLoggingTimeFile() (path string, err error) {
 	}
 	defer output.Close()
 	jsonEncoder := json.NewEncoder(output)
-	loggingTime := logging_time.AddLoggingTime{
+	loggingTime := loggingtime.AddLoggingTime{
 		CommentEmployee: "",
 		Day1Time:        0,
 		Day2Time:        0,
@@ -577,9 +576,7 @@ func loggingTimeFilePath() (filePath string, err error) {
 
 }
 
-
-
-func loggingTimeFromFIle() (loggingTime *logging_time.AddLoggingTime, err error) {
+func loggingTimeFromFIle() (loggingTime *loggingtime.AddLoggingTime, err error) {
 	path, err := loggingTimeFilePath()
 	if err != nil {
 		return nil, err
@@ -592,7 +589,7 @@ func loggingTimeFromFIle() (loggingTime *logging_time.AddLoggingTime, err error)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	logTime := logging_time.AddLoggingTime{}
+	logTime := loggingtime.AddLoggingTime{}
 	err = json.Unmarshal(data, &logTime)
 	return &logTime, nil
 }

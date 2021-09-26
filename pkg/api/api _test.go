@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"log"
 	"net/http"
-	logging_time "suft_sdk/internal/logging-time"
-	"suft_sdk/internal/schedule"
+	"suftsdk/internal/loggingtime"
+	"suftsdk/internal/schedule"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var fakeSchedule1 = schedule.Schedule{
@@ -52,7 +53,7 @@ var fakeSchedule2 = schedule.Schedule{
 	StatusCode: "25",
 }
 
-var fakeLoggingTime1 = logging_time.LoggingTime{
+var fakeLoggingTime1 = loggingtime.LoggingTime{
 	AdminEmployee:        schedule.Employee{},
 	CommentAdminEmployee: "fake comment from Admin",
 	CommentEmployee:      "fake comment from Employee",
@@ -71,7 +72,7 @@ var fakeLoggingTime1 = logging_time.LoggingTime{
 	WorkKindId:           0,
 }
 
-var fakeLoggingTime2 = logging_time.LoggingTime{
+var fakeLoggingTime2 = loggingtime.LoggingTime{
 	AdminEmployee:        schedule.Employee{},
 	CommentAdminEmployee: "fake comment from Admin2",
 	CommentEmployee:      "fake comment from Employee2",
@@ -212,7 +213,7 @@ func TestLoggingTimeListSuccess(t *testing.T) {
 		Size: 5,
 	})
 	require.NoError(t, err)
-	assert.Equal(t, []logging_time.LoggingTime{fakeLoggingTime1, fakeLoggingTime2}, loggingTimeList)
+	assert.Equal(t, []loggingtime.LoggingTime{fakeLoggingTime1, fakeLoggingTime2}, loggingTimeList)
 }
 
 func TestLoggingTimeListUnauthorized(t *testing.T) {
@@ -243,7 +244,7 @@ func TestAddLoggingTimeSuccess(t *testing.T) {
 		log.Fatalln(err)
 	}
 	GetRequireResp = SuccessRespAddLoggingTime
-	loggingTimeResp, err := client.AddLoggingTime(777, &logging_time.AddLoggingTime{})
+	loggingTimeResp, err := client.AddLoggingTime(777, &loggingtime.AddLoggingTime{})
 	require.NoError(t, err)
 	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
 }
@@ -254,7 +255,7 @@ func TestAddLoggingTimeUnauthorized(t *testing.T) {
 		log.Fatalln(err)
 	}
 	GetRequireResp = UnauthorizedResp
-	loggingTimeResp, err := client.AddLoggingTime(5, &logging_time.AddLoggingTime{})
+	loggingTimeResp, err := client.AddLoggingTime(5, &loggingtime.AddLoggingTime{})
 	assert.Error(t, err)
 	assert.Nil(t, loggingTimeResp)
 }
@@ -265,7 +266,7 @@ func TestAddLoggingTimeError(t *testing.T) {
 		log.Fatalln(err)
 	}
 	GetRequireResp = ErrorRespFromDoHttp
-	loggingTimeResp, err := client.AddLoggingTime(5, &logging_time.AddLoggingTime{})
+	loggingTimeResp, err := client.AddLoggingTime(5, &loggingtime.AddLoggingTime{})
 	require.Error(t, err)
 	assert.Nil(t, loggingTimeResp)
 }
@@ -353,7 +354,7 @@ func SuccessRespDetailSchedule() (*http.Response, error) {
 }
 
 func SuccessRespLoggingTimeList() (*http.Response, error) {
-	schedules := []logging_time.LoggingTime{fakeLoggingTime1, fakeLoggingTime2}
+	schedules := []loggingtime.LoggingTime{fakeLoggingTime1, fakeLoggingTime2}
 	respB, _ := json.Marshal(schedules)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
@@ -393,7 +394,7 @@ func TestEditLoggingTimeSuccess(t *testing.T) {
 		log.Fatalln(err)
 	}
 	GetRequireResp = SuccessRespDetailLoggingTime
-	loggingTimeResp, err := client.EditLoggingTime(777, 777, &logging_time.EditLoggingTime{})
+	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
 	require.NoError(t, err)
 	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
 }
@@ -404,7 +405,7 @@ func TestEditLoggingTimeUnauthorized(t *testing.T) {
 		log.Fatalln(err)
 	}
 	GetRequireResp = UnauthorizedResp
-	loggingTimeResp, err := client.EditLoggingTime(777, 777, &logging_time.EditLoggingTime{})
+	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
 	assert.Error(t, err)
 	assert.Nil(t, loggingTimeResp)
 }
@@ -415,7 +416,7 @@ func TestEditLoggingTimeError(t *testing.T) {
 		log.Fatalln(err)
 	}
 	GetRequireResp = ErrorRespFromDoHttp
-	loggingTimeResp, err := client.EditLoggingTime(777, 777, &logging_time.EditLoggingTime{})
+	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
 	require.Error(t, err)
 	assert.Nil(t, loggingTimeResp)
 }

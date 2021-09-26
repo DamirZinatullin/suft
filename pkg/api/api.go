@@ -8,9 +8,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"suft_sdk/internal/auth"
-	logging_time "suft_sdk/internal/logging-time"
-	"suft_sdk/internal/schedule"
+	"suftsdk/internal/auth"
+	"suftsdk/internal/loggingtime"
+	"suftsdk/internal/schedule"
 	"time"
 )
 
@@ -51,13 +51,13 @@ type API interface {
 	Schedules(options *Options) ([]schedule.Schedule, error)
 	AddSchedule(periodId PeriodId) (*schedule.Schedule, error)
 	DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
-	LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]logging_time.LoggingTime, error)
-	AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) (*logging_time.LoggingTime, error)
-	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*logging_time.LoggingTime, error)
-	EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime) (*logging_time.LoggingTime, error)
+	LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]loggingtime.LoggingTime, error)
+	AddLoggingTime(scheduleId ScheduleId, loggingTime *loggingtime.AddLoggingTime) (*loggingtime.LoggingTime, error)
+	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*loggingtime.LoggingTime, error)
+	EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *loggingtime.EditLoggingTime) (*loggingtime.LoggingTime, error)
 	DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
-	SubmitForApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error
-	ApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error
+	SubmitForApproveSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
+	ApproveLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*loggingtime.LoggingTime, error)
 }
 
 type Client struct {
@@ -79,7 +79,7 @@ func NewClient(email string, password string) (API, error) {
 		BaseURL:      BaseURL,
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
-		HttpClient: httpClient,
+		HttpClient:   httpClient,
 	}, nil
 }
 
@@ -140,9 +140,12 @@ func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
 
 func (c *Client) AddSchedule(periodId PeriodId) (*schedule.Schedule, error) {
 	peiodIdStruct := struct {
-		PeriodId `json:"periodId"`
-	}{periodId}
+		PeriodId PeriodId `json:"periodId"`
+	}{PeriodId: periodId}
 	reqB, err := json.Marshal(peiodIdStruct)
+	if err != nil {
+		return nil, err
+	}
 	resp, err := c.doHTTP(http.MethodPost, SchedulesURN, reqB)
 	if err != nil {
 		return nil, err
@@ -194,7 +197,7 @@ func (c *Client) DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, erro
 	return &schedule, nil
 }
 
-func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]logging_time.LoggingTime, error) {
+func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]loggingtime.LoggingTime, error) {
 	page := 1
 	size := 5
 	if options != nil {
@@ -221,7 +224,7 @@ func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]l
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(string(respB))
 	}
-	loggingTimes := []logging_time.LoggingTime{}
+	loggingTimes := []loggingtime.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTimes)
 	if err != nil {
 		log.Println("LoggingTimeList: unable to unmarshal response body:", err)
@@ -232,7 +235,7 @@ func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]l
 
 }
 
-func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time.AddLoggingTime) (*logging_time.LoggingTime, error) {
+func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *loggingtime.AddLoggingTime) (*loggingtime.LoggingTime, error) {
 
 	reqB, err := json.Marshal(loggingTime)
 	if err != nil {
@@ -255,7 +258,7 @@ func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time
 		return nil, errors.New(string(respB))
 	}
 
-	loggingTimeResp := logging_time.LoggingTime{}
+	loggingTimeResp := loggingtime.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTimeResp)
 	if err != nil {
 		log.Println("AddLoggingTime: unable to unmarshal response body:", err)
@@ -265,7 +268,7 @@ func (c *Client) AddLoggingTime(scheduleId ScheduleId, loggingTime *logging_time
 
 }
 
-func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*logging_time.LoggingTime, error) {
+func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*loggingtime.LoggingTime, error) {
 	URN := fmt.Sprintf("%s/%d/%s/%d", SchedulesURN, scheduleId, LoggingTimeURN, loggingTimeId)
 	resp, err := c.doHTTP(http.MethodGet, URN, nil)
 	if err != nil {
@@ -281,7 +284,7 @@ func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingT
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(string(respB))
 	}
-	loggingTime := logging_time.LoggingTime{}
+	loggingTime := loggingtime.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTime)
 	if err != nil {
 		log.Println("DetailLoggingTime: unable to unmarshal response body:", err)
@@ -290,7 +293,7 @@ func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingT
 	return &loggingTime, nil
 }
 
-func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *logging_time.EditLoggingTime) (*logging_time.LoggingTime, error) {
+func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *loggingtime.EditLoggingTime) (*loggingtime.LoggingTime, error) {
 	reqB, err := json.Marshal(loggingTime)
 	if err != nil {
 		return nil, err
@@ -309,7 +312,7 @@ func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTim
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New(string(respB))
 	}
-	loggingTimeResp := logging_time.LoggingTime{}
+	loggingTimeResp := loggingtime.LoggingTime{}
 	err = json.Unmarshal(respB, &loggingTimeResp)
 	if err != nil {
 		log.Println("EditLoggingTime: unable to unmarshal response body:", err)
@@ -336,12 +339,87 @@ func (c *Client) DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingT
 	return nil
 }
 
-func (c *Client) SubmitForApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error {
-	panic("implement me")
+func (c *Client) SubmitForApproveSchedule(scheduleId ScheduleId) (*schedule.Schedule, error) {
+	URN := fmt.Sprintf("%s/%d", SchedulesURN, scheduleId)
+
+	statusCode := struct {
+		StatusCode schedule.StatusCode `json:"statusCode"`
+	}{
+		StatusCode: schedule.ToApprove,
+	}
+	reqB, err := json.Marshal(statusCode)
+	if err != nil {
+		log.Println("SubmitForApproveSchedule: unable to marshal body:", err)
+		return nil, err
+	}
+
+	resp, err := c.doHTTP(http.MethodPatch, URN, reqB)
+	if err != nil {
+		log.Println("SubmitForApproveSchedule: doHTTP:", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("SubmitForApproveSchedule: unable to read response body:", err)
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(respB))
+	}
+
+	schedule := schedule.Schedule{}
+
+	err = json.Unmarshal(respB, &schedule)
+	if err != nil {
+		log.Println("SubmitForApproveSchedule: unable to unmarshal response body:", err)
+		return nil, err
+	}
+
+	return &schedule, nil
 }
 
-func (c *Client) ApproveSchedule(scheduleId ScheduleId, loggingTimeId LoggingTimeId, status *schedule.EditStatusSchedule) error {
-	panic("implement me")
+func (c *Client) ApproveLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*loggingtime.LoggingTime, error) {
+	loggingTime := loggingtime.EditLoggingTime{
+		StatusCode: loggingtime.Approved,
+	}
+
+	reqB, err := json.Marshal(loggingTime)
+	if err != nil {
+		log.Println("ApproveLoggingTime: unable to marshal body:", err)
+		return nil, err
+	}
+
+	URN := fmt.Sprintf("%s/%d/%s/%d", SchedulesURN, scheduleId, LoggingTimeURN, loggingTimeId)
+
+	resp, err := c.doHTTP(http.MethodPatch, URN, reqB)
+	if err != nil {
+		log.Println("ApproveLoggingTime: doHTTP:", err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("ApproveLoggingTime: unable to read response body:", err)
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(respB))
+	}
+
+	loggingTimeResp := loggingtime.LoggingTime{}
+
+	err = json.Unmarshal(respB, &loggingTimeResp)
+	if err != nil {
+		log.Println("EditLoggingTime: unable to unmarshal response body:", err)
+		return nil, err
+	}
+	return &loggingTimeResp, nil
 }
 
 func (c *Client) doHTTP(httpMethod string, URN string, body []byte) (*http.Response, error) {

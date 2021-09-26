@@ -1,5 +1,14 @@
 package schedule
 
+const (
+	Approved  StatusCode = "УТВ"
+	Denied    StatusCode = "ОТКЛ"
+	Created   StatusCode = "СЗ"
+	ToApprove StatusCode = "НУ"
+)
+
+type StatusCode string
+
 type EmployeeInterface interface {
 	Validate()
 }

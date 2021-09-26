@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	logging_time "suft_sdk/internal/logging-time"
-	api "suft_sdk/pkg/api"
+	"suftsdk/internal/loggingtime"
+	"suftsdk/pkg/api"
 )
 
 func main() {
@@ -12,7 +12,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	addLT := logging_time.AddLoggingTime{
+	addLT := loggingtime.AddLoggingTime{
 		CommentEmployee: "hi",
 		Day1Time:        0,
 		Day2Time:        0,
@@ -34,7 +34,7 @@ func main() {
 	fmt.Printf("%#v\n\n", *loggingTimeCreated)
 
 	logTimeId := api.LoggingTimeId(loggingTimeCreated.Id)
-	loggingTimeEdit := logging_time.EditLoggingTime{
+	loggingTimeEdit := loggingtime.EditLoggingTime{
 		CommentAdminEmployee: "Комментарий админа",
 		CommentEmployee:      "Комментарий сотрудника",
 		Day1Time:             2,
@@ -45,7 +45,7 @@ func main() {
 		Day6Time:             0,
 		Day7Time:             0,
 		ProjectId:            8028,
-		StatusCode:           logging_time.Approved,
+		StatusCode:           loggingtime.Approved,
 		Task:                 "",
 		WorkKindId:           21,
 	}
