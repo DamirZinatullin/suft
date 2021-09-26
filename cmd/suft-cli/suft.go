@@ -30,7 +30,7 @@ type userConfig struct {
 
 const configFileName string = "suft_config.json"
 const configDirName string = "suft"
-const loggingTimeFileName string = "loggingtime.json"
+const loggingTimeFileName string = "logging_time.json"
 
 var scheduleId int
 var loggingTimeId int
