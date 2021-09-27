@@ -202,6 +202,41 @@ func TestDetailScheduleError(t *testing.T) {
 	assert.Nil(t, scheduleResp)
 }
 
+func TestSubmitForApproveScheduleSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = SuccessRespDetailSchedule
+	scheduleResp, err := client.SubmitForApproveSchedule(777)
+	require.NoError(t, err)
+	assert.Equal(t, &fakeSchedule1, scheduleResp)
+}
+
+func TestSubmitForApproveScheduleUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	scheduleResp, err := client.SubmitForApproveSchedule(777)
+	assert.Error(t, err)
+	assert.Nil(t, scheduleResp)
+}
+
+func TestSubmitForApproveScheduleError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	scheduleResp, err := client.SubmitForApproveSchedule(777)
+	require.Error(t, err)
+	assert.Nil(t, scheduleResp)
+}
+
+
+
 func TestLoggingTimeListSuccess(t *testing.T) {
 	client, err := NewFakeClient()
 	GetRequireResp = SuccessRespLoggingTimeList
@@ -336,8 +371,8 @@ func ErrorRespFromDoHttp() (*http.Response, error) {
 }
 
 func SuccessRespAddSchedule() (*http.Response, error) {
-	schedule := fakeSchedule1
-	respB, _ := json.Marshal(schedule)
+	scheduleReq := fakeSchedule1
+	respB, _ := json.Marshal(scheduleReq)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 201,
 		Body: body}
@@ -345,8 +380,8 @@ func SuccessRespAddSchedule() (*http.Response, error) {
 }
 
 func SuccessRespDetailSchedule() (*http.Response, error) {
-	schedule := fakeSchedule1
-	respB, _ := json.Marshal(schedule)
+	scheduleReq := fakeSchedule1
+	respB, _ := json.Marshal(scheduleReq)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
 		Body: body}
