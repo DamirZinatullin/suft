@@ -128,7 +128,7 @@ func main() {
 				if err != nil {
 					return err
 				}
-				options := api.Options{}
+				options := api.OptionsS{}
 				if size != 0 {
 					options.Size = size
 				}
@@ -403,8 +403,8 @@ func main() {
 				scheduleIdFlag,
 				loggingTimeIdFlag,
 				cli.StringFlag{
-					Name: "comment, c",
-					Usage: "Комментарий админа",
+					Name:        "comment, c",
+					Usage:       "Комментарий руководителя/согласующего",
 					Destination: &adminComment,
 				},
 			},
@@ -431,7 +431,6 @@ func main() {
 				fmt.Printf("%s\n\n", loggingTimeJSON)
 				return nil
 			}},
-
 	}
 	err := app.Run(os.Args)
 	if err != nil {

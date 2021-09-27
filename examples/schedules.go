@@ -21,7 +21,7 @@ func main() {
 		fmt.Printf("%#v\n", schedule)
 	}
 
-	schedules, err = client.Schedules(&api.Options{Page: 1, Size: 2})
+	schedules, err = client.Schedules(&api.OptionsS{Page: 1, Size: 2})
 	if err != nil {
 		log.Fatalln(err)
 	}

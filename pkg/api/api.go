@@ -32,7 +32,7 @@ type HttpClient interface {
 
 var httpClient HttpClient
 
-type Options struct {
+type OptionsS struct {
 	Page            int  `json:"page"`
 	Size            int  `json:"size"`
 	CreatorApprover Role `json:"creator_approver"`
@@ -48,13 +48,12 @@ type LoggingTimeId int
 type PeriodId int
 
 type API interface {
-	Schedules(options *Options) ([]schedule.Schedule, error)
+	Schedules(options *OptionsS) ([]schedule.Schedule, error)
 	AddSchedule(periodId PeriodId) (*schedule.Schedule, error)
 	DetailSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
 	LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]loggingtime.LoggingTime, error)
 	AddLoggingTime(scheduleId ScheduleId, loggingTime *loggingtime.AddLoggingTime) (*loggingtime.LoggingTime, error)
 	DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) (*loggingtime.LoggingTime, error)
-	// EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *loggingtime.EditLoggingTime) (*loggingtime.LoggingTime, error)
 	DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error
 	SubmitForApproveSchedule(scheduleId ScheduleId) (*schedule.Schedule, error)
 	ApproveLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, comment string) (*loggingtime.LoggingTime, error)
@@ -83,7 +82,7 @@ func NewClient(email string, password string) (API, error) {
 	}, nil
 }
 
-func (c *Client) Schedules(options *Options) ([]schedule.Schedule, error) {
+func (c *Client) Schedules(options *OptionsS) ([]schedule.Schedule, error) {
 	// если хочешь, можем досконально изучить пакет url и сделать элегантно,
 	// однако на данном этапе предлагаю сделать наиболее доступным, простым и рабочим способом,
 	// как я сделал ниже, а потом, если останется время, то переделаем с использованием пакета url.
