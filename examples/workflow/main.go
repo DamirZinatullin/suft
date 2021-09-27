@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	client1, err := api.NewClient("pakua", "147753")
+	client1, err := api.NewClient("pakua", "147753", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -55,7 +55,7 @@ func main() {
 	fmt.Printf("Трудозатраты расписания, отправленного на утверждение\n")
 	fmt.Printf("%#v\n\n", *loggingTimeForApprove)
 
-	client2, err := api.NewClient("nikonovov", "147753")
+	client2, err := api.NewClient("nikonovov", "147753", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}

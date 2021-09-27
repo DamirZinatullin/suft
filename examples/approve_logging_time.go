@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	client, err := api.NewClient("nikonovov", "147753")
+	client, err := api.NewClient("nikonovov", "147753", nil)
 	if err != nil {
 		log.Fatalln(err)
 	}

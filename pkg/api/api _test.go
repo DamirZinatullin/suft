@@ -105,7 +105,7 @@ func TestSchedulesSuccess(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	schedules, err := client.Schedules(&Options{
+	schedules, err := client.Schedules(&OptionsS{
 		Page:            7,
 		Size:            7,
 		CreatorApprover: "fake",
@@ -234,8 +234,6 @@ func TestSubmitForApproveScheduleError(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, scheduleResp)
 }
-
-
 
 func TestLoggingTimeListSuccess(t *testing.T) {
 	client, err := NewFakeClient()
