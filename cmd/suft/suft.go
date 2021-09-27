@@ -39,6 +39,7 @@ var page int
 var size int
 var role string
 var editor string
+var adminComment string
 
 var scheduleIdFlag cli.Flag = cli.IntFlag{
 	Name:        "schedule-id, scid",
@@ -401,6 +402,11 @@ func main() {
 			Flags: []cli.Flag{
 				scheduleIdFlag,
 				loggingTimeIdFlag,
+				cli.StringFlag{
+					Name: "comment, c",
+					Usage: "Комментарий админа",
+					Destination: &adminComment,
+				},
 			},
 			Category: "Временные затраты",
 			Action: func(c *cli.Context) error {
@@ -414,7 +420,7 @@ func main() {
 				}
 				scheduleId := api.ScheduleId(scheduleId)
 				loggingTimeId := api.LoggingTimeId(loggingTimeId)
-				loggingTime, err := client.ApproveLoggingTime(scheduleId, loggingTimeId)
+				loggingTime, err := client.ApproveLoggingTime(scheduleId, loggingTimeId, adminComment)
 				if err != nil {
 					return err
 				}
