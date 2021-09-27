@@ -32,12 +32,20 @@ type HttpClient interface {
 
 var httpClient HttpClient
 
+// опции для функции NewClient
+type OptionsNC struct {
+	SuftAPIURL  string
+	HttpTimeout time.Duration
+}
+
+// опции для метода Schedules
 type OptionsS struct {
 	Page            int  `json:"page"`
 	Size            int  `json:"size"`
 	CreatorApprover Role `json:"creator_approver"`
 }
 
+// опции для метода LoggingTimeList
 type OptionsLT struct {
 	Page int `json:"page"`
 	Size int `json:"size"`
@@ -66,16 +74,27 @@ type Client struct {
 	HttpClient   HttpClient
 }
 
-func NewClient(email string, password string) (API, error) {
+func NewClient(email string, password string, options *OptionsNC) (API, error) {
+	baseURL := BaseURL
+	httpTimeout := time.Minute
+	if options != nil {
+		if options.SuftAPIURL != "" {
+			baseURL = options.SuftAPIURL
+		}
+		if options.HttpTimeout != 0 {
+			httpTimeout = options.HttpTimeout
+		}
+	}
+
 	token, err := auth.Authenticate(email, password)
 	if err != nil {
 		return nil, err
 	}
 	httpClient = &http.Client{
-		Timeout: time.Minute,
+		Timeout: httpTimeout,
 	}
 	return &Client{
-		BaseURL:      BaseURL,
+		BaseURL:      baseURL,
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
 		HttpClient:   httpClient,
