@@ -225,6 +225,37 @@ func main() {
 				return nil
 			}},
 		{
+			Name:     "submit-for-approve",
+			Usage:    "Отправить расписание на утверждение",
+			Aliases:  []string{"s"},
+			Category: "Расписания",
+			Flags: []cli.Flag{
+				scheduleIdFlag,
+			},
+			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
+				client, err := newClientFromConfig()
+				if err != nil {
+					return err
+				}
+				schedId := api.ScheduleId(scheduleId)
+
+				schedule, err := client.SubmitForApproveSchedule(schedId)
+				if err != nil {
+					return err
+				}
+				scheduleJSON, err := json.Marshal(schedule)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("%s\n", scheduleJSON)
+				return nil
+			}},
+
+		{
 			Name:        "logging-times",
 			Usage:       "Список временных затрат",
 			Aliases:     []string{"lts"},
@@ -370,6 +401,39 @@ func main() {
 				fmt.Println("Временная затрата успешно удалена")
 				return nil
 			}},
+		{
+			Name:        "approve-logging-time",
+			Usage:       "Утверждение временной затраты",
+			Description: "Для утверждения временной затраты необходимо передать Id расписания и Id временой затраты",
+			Aliases:     []string{"aprv"},
+			Flags: []cli.Flag{
+				scheduleIdFlag,
+				loggingTimeIdFlag,
+			},
+			Category: "Временные затраты",
+			Action: func(c *cli.Context) error {
+				err := refreshConfig()
+				if err != nil {
+					return err
+				}
+				client, err := newClientFromConfig()
+				if err != nil {
+					return err
+				}
+				scheduleId := api.ScheduleId(scheduleId)
+				loggingTimeId := api.LoggingTimeId(loggingTimeId)
+				loggingTime, err := client.ApproveLoggingTime(scheduleId, loggingTimeId)
+				if err != nil {
+					return err
+				}
+				loggingTimeJSON, err := json.Marshal(loggingTime)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("%s\n\n", loggingTimeJSON)
+				return nil
+			}},
+
 	}
 	err := app.Run(os.Args)
 	if err != nil {
