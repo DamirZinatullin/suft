@@ -12,7 +12,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	loggingTime, err := client.ApproveLoggingTime(32992, 327829)
+	loggingTime, err := client.ApproveLoggingTime(32992, 327829, "всё хорошо")
 	if err != nil {
 		log.Fatalln(err)
 	}
