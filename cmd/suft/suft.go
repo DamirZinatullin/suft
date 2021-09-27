@@ -42,7 +42,7 @@ var editor string
 
 var scheduleIdFlag cli.Flag = cli.IntFlag{
 	Name:        "schedule-id, scid",
-	Usage:       "Id расписания",
+	Usage:       "id расписания",
 	Required:    true,
 	Destination: &scheduleId,
 }
@@ -61,14 +61,14 @@ var sizeFlag cli.Flag = cli.IntFlag{
 
 var periodFlag cli.Flag = cli.IntFlag{
 	Name:        "period-id, pid",
-	Usage:       "Id периуда",
+	Usage:       "id периуда",
 	Required:    true,
 	Destination: &periodId,
 }
 
 var loggingTimeIdFlag cli.Flag = cli.IntFlag{
 	Name:        "logging-time-id, ltid",
-	Usage:       "Id временной затраты",
+	Usage:       "id временной затраты",
 	Required:    true,
 	Destination: &loggingTimeId,
 }
@@ -110,16 +110,8 @@ func main() {
 			Category: "Расписания",
 			Aliases:  []string{"scs"},
 			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:        "page, p",
-					Usage:       "Страница отображения",
-					Destination: &page,
-				},
-				cli.IntFlag{
-					Name:        "size, s",
-					Usage:       "Количество отображаемых элементов",
-					Destination: &size,
-				},
+				pageFlag,
+				sizeFlag,
 				cli.StringFlag{
 					Name:        "role, r",
 					Usage:       "Роль клиента (approver или creator)",
@@ -259,7 +251,7 @@ func main() {
 			Name:        "logging-times",
 			Usage:       "Список временных затрат",
 			Aliases:     []string{"lts"},
-			Description: "Для вывода списка временных затрат необходимо передать Id расписания",
+			Description: "Для вывода списка временных затрат необходимо передать id расписания",
 			Flags: []cli.Flag{
 				scheduleIdFlag,
 				pageFlag,
@@ -299,7 +291,7 @@ func main() {
 		{
 			Name:        "logging-time",
 			Usage:       "Детализация временной затраты",
-			Description: "Для вывода временной затраты необходимо передать Id расписания и Id временой затраты",
+			Description: "Для вывода временной затраты необходимо передать id расписания и id временой затраты",
 			Aliases:     []string{"lt"},
 			Flags: []cli.Flag{
 				scheduleIdFlag,
@@ -404,7 +396,7 @@ func main() {
 		{
 			Name:        "approve-logging-time",
 			Usage:       "Утверждение временной затраты",
-			Description: "Для утверждения временной затраты необходимо передать Id расписания и Id временой затраты",
+			Description: "Для утверждения временной затраты необходимо передать id расписания и id временой затраты",
 			Aliases:     []string{"aprv"},
 			Flags: []cli.Flag{
 				scheduleIdFlag,
