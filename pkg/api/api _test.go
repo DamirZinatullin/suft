@@ -423,38 +423,38 @@ func SuccessRespDetailLoggingTime() (*http.Response, error) {
 	return &resp, nil
 }
 
-func TestEditLoggingTimeSuccess(t *testing.T) {
-	client, err := NewFakeClient()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	GetRequireResp = SuccessRespDetailLoggingTime
-	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
-	require.NoError(t, err)
-	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
-}
+// func TestEditLoggingTimeSuccess(t *testing.T) {
+// 	client, err := NewFakeClient()
+// 	if err != nil {
+// 		log.Fatalln(err)
+// 	}
+// 	GetRequireResp = SuccessRespDetailLoggingTime
+// 	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
+// 	require.NoError(t, err)
+// 	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
+// }
 
-func TestEditLoggingTimeUnauthorized(t *testing.T) {
-	client, err := NewFakeClient()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	GetRequireResp = UnauthorizedResp
-	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
-	assert.Error(t, err)
-	assert.Nil(t, loggingTimeResp)
-}
+// func TestEditLoggingTimeUnauthorized(t *testing.T) {
+// 	client, err := NewFakeClient()
+// 	if err != nil {
+// 		log.Fatalln(err)
+// 	}
+// 	GetRequireResp = UnauthorizedResp
+// 	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
+// 	assert.Error(t, err)
+// 	assert.Nil(t, loggingTimeResp)
+// }
 
-func TestEditLoggingTimeError(t *testing.T) {
-	client, err := NewFakeClient()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	GetRequireResp = ErrorRespFromDoHttp
-	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
-	require.Error(t, err)
-	assert.Nil(t, loggingTimeResp)
-}
+// func TestEditLoggingTimeError(t *testing.T) {
+// 	client, err := NewFakeClient()
+// 	if err != nil {
+// 		log.Fatalln(err)
+// 	}
+// 	GetRequireResp = ErrorRespFromDoHttp
+// 	loggingTimeResp, err := client.EditLoggingTime(777, 777, &loggingtime.EditLoggingTime{})
+// 	require.Error(t, err)
+// 	assert.Nil(t, loggingTimeResp)
+// }
 
 func TestDeleteLoggingTimeSuccess(t *testing.T) {
 	client, err := NewFakeClient()

@@ -60,7 +60,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	loggingTimeApproved, err := client2.ApproveLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id))
+	loggingTimeApproved, err := client2.ApproveLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id), "всё хорошо")
 	if err != nil {
 		log.Fatalln(err)
 	}
