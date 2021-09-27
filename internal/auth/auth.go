@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -44,8 +45,13 @@ func Authenticate(email string, password string) (*Token, error) {
 
 	defer resp.Body.Close()
 
+	respB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Auth: unable to read authentification tokens:", err)
+		return nil, err
+	}
 	if resp.StatusCode != http.StatusOK {
-		return token, errors.New("unable to get authentification tokens")
+		return nil, errors.New(string(respB))
 	}
 
 	for _, cookie := range resp.Cookies() {
