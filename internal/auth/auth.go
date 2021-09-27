@@ -79,7 +79,7 @@ func Refresh(refreshToken string) (*Token, error) {
 	)
 	if err != nil {
 		log.Println(err)
-		return token, err
+		return nil, err
 	}
 	req.Header.Add("Auth-method", "Password")
 	req.Header.Add("Content-Type", "application/json; charset=UTF-8")
@@ -91,13 +91,13 @@ func Refresh(refreshToken string) (*Token, error) {
 
 	resp, err := cli.Do(req)
 	if err != nil {
-		return token, err
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return token, errors.New("unable to get authentification tokens")
+		return nil, errors.New("unable to get authentification tokens")
 	}
 
 	for _, cookie := range resp.Cookies() {

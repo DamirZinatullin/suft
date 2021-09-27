@@ -16,11 +16,10 @@ func TestAuthenticateSuccess(t *testing.T) {
 }
 
 func TestAuthenticateUnauthorized(t *testing.T) {
-	token, err := Authenticate("fake@example.com", "demo")
+	token, err := Authenticate("fake@example.com", "fake")
 	require.Error(t, err)
 	assert.Nil(t, token)
 }
-
 
 func TestRefresh(t *testing.T) {
 	token, err := Authenticate("demo@example.com", "demo")
@@ -28,4 +27,10 @@ func TestRefresh(t *testing.T) {
 	require.NoError(t, err)
 	fmt.Println("Access-token:", tokenResp.AccessToken)
 	fmt.Println("Refresh-token:", tokenResp.RefreshToken)
+}
+
+func TestRefreshFail(t *testing.T) {
+	token, err := Refresh("fake")
+	require.Error(t, err)
+	assert.Nil(t, token)
 }
