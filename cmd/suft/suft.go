@@ -197,6 +197,19 @@ func main() {
 			Category: loggingTimeCategory,
 			Action:   approveLoggingTime,
 		},
+		{
+			Name:        "decline-logging-time",
+			Usage:       "Отклонение временной затраты",
+			Description: "Для отклонения временной затраты необходимо передать id расписания и id временой затраты",
+			Aliases:     []string{"dcl"},
+			Flags: []cli.Flag{
+				scheduleIdFlag,
+				loggingTimeIdFlag,
+				commentFlag,
+			},
+			Category: loggingTimeCategory,
+			Action:   declineLoggingTime,
+		},
 	}
 	err := app.Run(os.Args)
 	if err != nil {
@@ -449,6 +462,30 @@ func approveLoggingTime(c *cli.Context) error {
 	scheduleId := api.ScheduleId(scheduleId)
 	loggingTimeId := api.LoggingTimeId(loggingTimeId)
 	loggingTime, err := client.ApproveLoggingTime(scheduleId, loggingTimeId, adminComment)
+	if err != nil {
+		return err
+	}
+	loggingTimeJSON, err := json.Marshal(loggingTime)
+
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n\n", loggingTimeJSON)
+	return nil
+}
+
+func declineLoggingTime(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	scheduleId := api.ScheduleId(scheduleId)
+	loggingTimeId := api.LoggingTimeId(loggingTimeId)
+	loggingTime, err := client.DeclineLoggingTime(scheduleId, loggingTimeId, adminComment)
 	if err != nil {
 		return err
 	}
