@@ -350,12 +350,18 @@ func main() {
 				if err != nil {
 					return err
 				}
-				cmd := exec.Command(editor, fmt.Sprintf("%s", path))
+				cmd := exec.Command(editor, path)
 				cmd.Stdin = os.Stdin
 				cmd.Stdout = os.Stdout
 				err = cmd.Run()
+				if err != nil {
+					return err
+				}
 				scheduleId := api.ScheduleId(scheduleId)
 				loggingTime, err := loggingTimeFromFIle()
+				if err != nil {
+					return err
+				}
 				loggingTimeResp, err := client.AddLoggingTime(scheduleId, loggingTime)
 				if err != nil {
 					return err
@@ -450,7 +456,7 @@ func loginSuft() error {
 	password := string(bytePassword)
 	password = strings.Trim(password, "\n")
 
-	token, err := auth.Authenticate(login, password)
+	token, err := auth.Authenticate(login, password, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -530,6 +536,9 @@ func newClientFromConfig() (client api.API, err error) {
 	}
 	userConf := userConfig{}
 	err = json.Unmarshal(data, &userConf)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	client = &api.Client{
 		BaseURL:      api.BaseURL,
 		AccessToken:  userConf.Token.AccessToken,
@@ -554,10 +563,13 @@ func refreshConfig() error {
 	}
 	userConf := userConfig{}
 	err = json.Unmarshal(data, &userConf)
+	if err != nil {
+		return err
+	}
 	if userConf.DateRefresh.Add(time.Minute * 2).After(time.Now()) {
 		return nil
 	}
-	token, err := auth.Refresh(userConf.Token.RefreshToken)
+	token, err := auth.Refresh(userConf.Token.RefreshToken, nil)
 	if err != nil {
 		return errors.New("время сессии истекло, пройдите аутентификацию, выполнив команду login")
 	}
@@ -647,5 +659,8 @@ func loggingTimeFromFIle() (loggingTime *loggingtime.AddLoggingTime, err error) 
 	}
 	logTime := loggingtime.AddLoggingTime{}
 	err = json.Unmarshal(data, &logTime)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	return &logTime, nil
 }
