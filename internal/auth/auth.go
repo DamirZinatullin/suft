@@ -128,7 +128,7 @@ func Refresh(refreshToken string, options *Options) (*Token, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("unable to refresh tokens")
+		return nil, errors.New("unable to refresh tokens. Please re-login")
 	}
 
 	for _, cookie := range resp.Cookies() {

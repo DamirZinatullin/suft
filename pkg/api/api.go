@@ -121,13 +121,11 @@ func (c *Client) Schedules(options *OptionsS) ([]*Schedule, error) {
 	// 	return nil, err
 	// }
 	// reqURL = base.ResolveReference(reqURL)
-	page := 1
+	page := 0
 	size := 5
 	creatorApprover := Creator
 	if options != nil {
-		if options.Page != 0 {
-			page = options.Page
-		}
+		page = options.Page
 		if options.Size != 0 {
 			size = options.Size
 		}
@@ -225,12 +223,10 @@ func (c *Client) DetailSchedule(scheduleId ScheduleId) (*Schedule, error) {
 }
 
 func (c *Client) LoggingTimeList(scheduleId ScheduleId, options *OptionsLT) ([]*LoggingTime, error) {
-	page := 1
+	page := 0
 	size := 5
 	if options != nil {
-		if options.Page != 0 {
-			page = options.Page
-		}
+		page = options.Page
 		if options.Size != 0 {
 			size = options.Size
 		}
@@ -537,7 +533,7 @@ func (c *Client) DeclineLoggingTime(scheduleId ScheduleId, loggingTimeId Logging
 
 func (c *Client) doHTTP(httpMethod string, URN string, body []byte) (*http.Response, error) {
 	reqBody := bytes.NewBuffer(body)
-	req, err := http.NewRequest(
+	req1, err := http.NewRequest(
 		httpMethod,
 		fmt.Sprint(BaseURL, URN),
 		reqBody,
@@ -546,20 +542,51 @@ func (c *Client) doHTTP(httpMethod string, URN string, body []byte) (*http.Respo
 		log.Println(err)
 		return nil, err
 	}
-	req.Header.Add("Auth-method", "Password")
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Accept-Charset", "UTF-8")
+	req1.Header.Add("Auth-method", "Password")
+	req1.Header.Add("Content-Type", "application/json")
+	req1.Header.Add("Accept-Charset", "UTF-8")
 
 	cookieAccessToken := &http.Cookie{
 		Name:  "Access-token",
 		Value: c.AccessToken,
 	}
-	req.AddCookie(cookieAccessToken)
+	req1.AddCookie(cookieAccessToken)
 
-	resp, err := c.HttpClient.Do(req)
+	resp, err := c.HttpClient.Do(req1)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		tokens, err := auth.Refresh(c.RefreshToken, nil)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		c.AccessToken = tokens.AccessToken
+		c.RefreshToken = tokens.RefreshToken
+
+		cookieAccessToken.Value = tokens.AccessToken
+		req2, err := http.NewRequest(
+			httpMethod,
+			fmt.Sprint(BaseURL, URN),
+			reqBody,
+		)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		req2.Header.Add("Auth-method", "Password")
+		req2.Header.Add("Content-Type", "application/json")
+		req2.Header.Add("Accept-Charset", "UTF-8")
+		req2.AddCookie(cookieAccessToken)
+		resp, err = c.HttpClient.Do(req2)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+	}
+
 	return resp, nil
 }
