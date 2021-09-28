@@ -1,4 +1,4 @@
-package utils
+package clifuncs
 
 import (
 	"bufio"
@@ -21,13 +21,12 @@ import (
 	"time"
 )
 
-
 const configFileName string = "suft_config.json"
 const configDirName string = "suft"
 const loggingTimeFileName string = "logging_time.json"
 
 type userConfig struct {
-	Token auth.Token
+	Token       auth.Token
 	DateRefresh time.Time
 }
 
@@ -54,7 +53,6 @@ func NewClientFromConfig() (client api.API, err error) {
 			Timeout: time.Minute,
 		},
 	}
-
 	return client, nil
 }
 

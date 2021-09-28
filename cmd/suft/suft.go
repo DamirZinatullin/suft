@@ -7,13 +7,12 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"suftsdk/cmd/suft/utils"
+	"suftsdk/internal/clifuncs"
 	"suftsdk/pkg/api"
 )
 
 const scheduleCategory string = "Расписания"
 const loggingTimeCategory string = "Временные затраты"
-
 
 var scheduleId int
 var loggingTimeId int
@@ -43,6 +42,12 @@ var sizeFlag cli.Flag = cli.IntFlag{
 	Destination: &size,
 }
 
+var roleFlag cli.Flag = cli.StringFlag{
+	Name:        "role, r",
+	Usage:       "Роль клиента (approver или creator)",
+	Destination: &role,
+}
+
 var periodFlag cli.Flag = cli.IntFlag{
 	Name:        "period-id, pid",
 	Usage:       "id периуда",
@@ -57,6 +62,20 @@ var loggingTimeIdFlag cli.Flag = cli.IntFlag{
 	Destination: &loggingTimeId,
 }
 
+var editorFlag cli.Flag = cli.StringFlag{
+	Name:        "editor, e",
+	Usage:       "Используемый текстовый редактор",
+	Destination: &editor,
+	Value:       "vim",
+	EnvVar:      "EDITOR",
+}
+
+var commentFlag cli.Flag = cli.StringFlag{
+	Name:        "comment, c",
+	Usage:       "Комментарий руководителя/согласующего",
+	Destination: &adminComment,
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "SUFT CLI"
@@ -66,26 +85,14 @@ func main() {
 			Name:     "login",
 			Usage:    "Аутентификация клиента",
 			Category: "Клиент",
-			Action: func(c *cli.Context) error {
-				err := utils.LoginSuft()
-				if err != nil {
-					return err
-				}
-				fmt.Println("Клиент успешно прошел аутентификацию")
-				return nil
-			}},
+			Action:   login,
+		},
 		{
 			Name:     "logout",
 			Usage:    "Выход из клиента",
 			Category: "Клиент",
-			Action: func(c *cli.Context) error {
-				err := utils.LogoutSuft()
-				if err != nil {
-					return err
-				}
-				fmt.Println("Успешный выход из клиента")
-				return nil
-			}},
+			Action:   logout,
+		},
 		{
 			Name:     "schedules",
 			Usage:    "Список расписаний",
@@ -94,46 +101,10 @@ func main() {
 			Flags: []cli.Flag{
 				pageFlag,
 				sizeFlag,
-				cli.StringFlag{
-					Name:        "role, r",
-					Usage:       "Роль клиента (approver или creator)",
-					Destination: &role,
-				},
+				roleFlag,
 			},
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-				options := api.OptionsS{}
-				if size != 0 {
-					options.Size = size
-				}
-				if page != 0 {
-					options.Page = page
-				}
-				if role != "" {
-					clientRole := api.Role(role)
-					options.CreatorApprover = clientRole
-				}
-				schedules, err := client.Schedules(&options)
-				if err != nil {
-					return err
-				}
-
-				for _, schedule := range schedules {
-					scheduleJSON, err := json.Marshal(schedule)
-					if err != nil {
-						return err
-					}
-					fmt.Printf("%s\n", scheduleJSON)
-				}
-				return nil
-			}},
+			Action: schedules,
+		},
 		{
 			Name:     "schedule",
 			Usage:    "Детализация расписания",
@@ -142,29 +113,8 @@ func main() {
 			Flags: []cli.Flag{
 				scheduleIdFlag,
 			},
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-				schedId := api.ScheduleId(scheduleId)
-
-				schedule, err := client.DetailSchedule(schedId)
-				if err != nil {
-					return err
-				}
-				scheduleJSON, err := json.Marshal(schedule)
-				if err != nil {
-					return err
-				}
-				fmt.Printf("%s\n", scheduleJSON)
-
-				return nil
-			}},
+			Action: scheduleDetail,
+		},
 		{
 			Name:        "add-schedule",
 			Usage:       "Добавление расписания",
@@ -174,30 +124,8 @@ func main() {
 			Flags: []cli.Flag{
 				periodFlag,
 			},
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-
-				periodId := api.PeriodId(periodId)
-
-				schedule, err := client.AddSchedule(periodId)
-				if err != nil {
-					return err
-				}
-				scheduleJSON, err := json.Marshal(schedule)
-				if err != nil {
-					return err
-				}
-				fmt.Printf("%s\n", scheduleJSON)
-
-				return nil
-			}},
+			Action: addSchedule,
+		},
 		{
 			Name:     "submit-for-approve",
 			Usage:    "Отправить расписание на утверждение",
@@ -206,28 +134,8 @@ func main() {
 			Flags: []cli.Flag{
 				scheduleIdFlag,
 			},
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-				schedId := api.ScheduleId(scheduleId)
-
-				schedule, err := client.SubmitForApproveSchedule(schedId)
-				if err != nil {
-					return err
-				}
-				scheduleJSON, err := json.Marshal(schedule)
-				if err != nil {
-					return err
-				}
-				fmt.Printf("%s\n", scheduleJSON)
-				return nil
-			}},
+			Action: submitForApprove,
+		},
 
 		{
 			Name:        "logging-times",
@@ -240,36 +148,8 @@ func main() {
 				sizeFlag,
 			},
 			Category: loggingTimeCategory,
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-				options := api.OptionsLT{}
-				if size != 0 {
-					options.Size = size
-				}
-				if page != 0 {
-					options.Page = page
-				}
-				scheduleId := api.ScheduleId(scheduleId)
-				loggingTimeList, err := client.LoggingTimeList(scheduleId, &options)
-				if err != nil {
-					return err
-				}
-				for _, schedule := range loggingTimeList {
-					loggingTimeJSON, err := json.Marshal(schedule)
-					if err != nil {
-						return err
-					}
-					fmt.Printf("%s\n\n", loggingTimeJSON)
-				}
-				return nil
-			}},
+			Action:   loggingTimes,
+		},
 		{
 			Name:        "logging-time",
 			Usage:       "Детализация временной затраты",
@@ -280,28 +160,8 @@ func main() {
 				loggingTimeIdFlag,
 			},
 			Category: loggingTimeCategory,
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-				scheduleId := api.ScheduleId(scheduleId)
-				loggingTimeId := api.LoggingTimeId(loggingTimeId)
-				loggingTime, err := client.DetailLoggingTime(scheduleId, loggingTimeId)
-				if err != nil {
-					return err
-				}
-				loggingTimeJSON, err := json.Marshal(loggingTime)
-				if err != nil {
-					return err
-				}
-				fmt.Printf("%s\n\n", loggingTimeJSON)
-				return nil
-			}},
+			Action:   loggingTimeDetail,
+		},
 		{
 			Name:     "add-logging-time",
 			Usage:    "Добавление временной затраты",
@@ -309,51 +169,10 @@ func main() {
 			Aliases:  []string{"al"},
 			Flags: []cli.Flag{
 				scheduleIdFlag,
-				cli.StringFlag{
-					Name:        "editor, e",
-					Usage:       "Используемый текстовый редактор",
-					Destination: &editor,
-					Value:       "vim",
-					EnvVar:      "EDITOR",
-				},
+				editorFlag,
 			},
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-				path, err := utils.GenLoggingTimeFile()
-				if err != nil {
-					return err
-				}
-				cmd := exec.Command(editor, path)
-				cmd.Stdin = os.Stdin
-				cmd.Stdout = os.Stdout
-				err = cmd.Run()
-				if err != nil {
-					return err
-				}
-				scheduleId := api.ScheduleId(scheduleId)
-				loggingTime, err := utils.LoggingTimeFromFile()
-				if err != nil {
-					return err
-				}
-				loggingTimeResp, err := client.AddLoggingTime(scheduleId, loggingTime)
-				if err != nil {
-					return err
-				}
-				LoggingTimeJSON, err := json.Marshal(loggingTimeResp)
-				if err != nil {
-					return err
-				}
-				fmt.Printf("%s\n", LoggingTimeJSON)
-
-				return nil
-			}},
+			Action: addLoggingTime,
+		},
 		{
 			Name:     "remove-logging-time",
 			Usage:    "Удаление временной затраты",
@@ -363,24 +182,8 @@ func main() {
 				scheduleIdFlag,
 				loggingTimeIdFlag,
 			},
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-				scheduleId := api.ScheduleId(scheduleId)
-				loggingTimeId := api.LoggingTimeId(loggingTimeId)
-				err = client.DeleteLoggingTime(scheduleId, loggingTimeId)
-				if err != nil {
-					return err
-				}
-				fmt.Println("Временная затрата успешно удалена")
-				return nil
-			}},
+			Action: removeLoggingTime,
+		},
 		{
 			Name:        "approve-logging-time",
 			Usage:       "Утверждение временной затраты",
@@ -389,38 +192,269 @@ func main() {
 			Flags: []cli.Flag{
 				scheduleIdFlag,
 				loggingTimeIdFlag,
-				cli.StringFlag{
-					Name:        "comment, c",
-					Usage:       "Комментарий руководителя/согласующего",
-					Destination: &adminComment,
-				},
+				commentFlag,
 			},
 			Category: loggingTimeCategory,
-			Action: func(c *cli.Context) error {
-				err := utils.RefreshConfig()
-				if err != nil {
-					return err
-				}
-				client, err := utils.NewClientFromConfig()
-				if err != nil {
-					return err
-				}
-				scheduleId := api.ScheduleId(scheduleId)
-				loggingTimeId := api.LoggingTimeId(loggingTimeId)
-				loggingTime, err := client.ApproveLoggingTime(scheduleId, loggingTimeId, adminComment)
-				if err != nil {
-					return err
-				}
-				loggingTimeJSON, err := json.Marshal(loggingTime)
-				if err != nil {
-					return err
-				}
-				fmt.Printf("%s\n\n", loggingTimeJSON)
-				return nil
-			}},
+			Action:   approveLoggingTime,
+		},
 	}
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func login(c *cli.Context) error {
+	err := clifuncs.LoginSuft()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Клиент успешно прошел аутентификацию")
+	return nil
+}
+
+func logout(c *cli.Context) error {
+	err := clifuncs.LogoutSuft()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Успешный выход из клиента")
+	return nil
+}
+
+func schedules(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	options := api.OptionsS{}
+	if size != 0 {
+		options.Size = size
+	}
+	if page != 0 {
+		options.Page = page
+	}
+	if role != "" {
+		clientRole := api.Role(role)
+		options.CreatorApprover = clientRole
+	}
+	schedules, err := client.Schedules(&options)
+	if err != nil {
+		return err
+	}
+
+	for _, schedule := range schedules {
+		scheduleJSON, err := json.Marshal(schedule)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", scheduleJSON)
+	}
+	return nil
+}
+
+func scheduleDetail(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	schedId := api.ScheduleId(scheduleId)
+	schedule, err := client.DetailSchedule(schedId)
+	if err != nil {
+		return err
+	}
+	scheduleJSON, err := json.Marshal(schedule)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n", scheduleJSON)
+
+	return nil
+}
+
+func addSchedule(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	periodId := api.PeriodId(periodId)
+	schedule, err := client.AddSchedule(periodId)
+	if err != nil {
+		return err
+	}
+	scheduleJSON, err := json.Marshal(schedule)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n", scheduleJSON)
+
+	return nil
+}
+
+func submitForApprove(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	schedId := api.ScheduleId(scheduleId)
+
+	schedule, err := client.SubmitForApproveSchedule(schedId)
+	if err != nil {
+		return err
+	}
+	scheduleJSON, err := json.Marshal(schedule)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n", scheduleJSON)
+	return nil
+}
+
+func loggingTimes(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	options := api.OptionsLT{}
+	if size != 0 {
+		options.Size = size
+	}
+	if page != 0 {
+		options.Page = page
+	}
+	scheduleId := api.ScheduleId(scheduleId)
+	loggingTimeList, err := client.LoggingTimeList(scheduleId, &options)
+	if err != nil {
+		return err
+	}
+	for _, schedule := range loggingTimeList {
+		loggingTimeJSON, err := json.Marshal(schedule)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n\n", loggingTimeJSON)
+	}
+	return nil
+}
+
+func loggingTimeDetail(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	scheduleId := api.ScheduleId(scheduleId)
+	loggingTimeId := api.LoggingTimeId(loggingTimeId)
+	loggingTime, err := client.DetailLoggingTime(scheduleId, loggingTimeId)
+	if err != nil {
+		return err
+	}
+	loggingTimeJSON, err := json.Marshal(loggingTime)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n\n", loggingTimeJSON)
+	return nil
+}
+
+func addLoggingTime(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	path, err := clifuncs.GenLoggingTimeFile()
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command(editor, path)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	scheduleId := api.ScheduleId(scheduleId)
+	loggingTime, err := clifuncs.LoggingTimeFromFile()
+	if err != nil {
+		return err
+	}
+	loggingTimeResp, err := client.AddLoggingTime(scheduleId, loggingTime)
+	if err != nil {
+		return err
+	}
+	LoggingTimeJSON, err := json.Marshal(loggingTimeResp)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n", LoggingTimeJSON)
+	return nil
+}
+
+func removeLoggingTime(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	scheduleId := api.ScheduleId(scheduleId)
+	loggingTimeId := api.LoggingTimeId(loggingTimeId)
+	err = client.DeleteLoggingTime(scheduleId, loggingTimeId)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Временная затрата успешно удалена")
+	return nil
+}
+
+func approveLoggingTime(c *cli.Context) error {
+	err := clifuncs.RefreshConfig()
+	if err != nil {
+		return err
+	}
+	client, err := clifuncs.NewClientFromConfig()
+	if err != nil {
+		return err
+	}
+	scheduleId := api.ScheduleId(scheduleId)
+	loggingTimeId := api.LoggingTimeId(loggingTimeId)
+	loggingTime, err := client.ApproveLoggingTime(scheduleId, loggingTimeId, adminComment)
+	if err != nil {
+		return err
+	}
+	loggingTimeJSON, err := json.Marshal(loggingTime)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s\n\n", loggingTimeJSON)
+	return nil
 }
