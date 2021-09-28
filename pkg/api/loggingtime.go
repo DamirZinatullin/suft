@@ -44,6 +44,15 @@ func (l *LoggingTime) ApproveLoggingTime(comment string) (*LoggingTime, error) {
 	return loggingTime, nil
 }
 
+func (l *LoggingTime) DeclineLoggingTime(comment string) (*LoggingTime, error) {
+	loggingTimeId := LoggingTimeId(l.Id)
+	loggingTime, err := l.client.DeclineLoggingTime(l.scheduleId, loggingTimeId, comment)
+	if err != nil {
+		return nil, err
+	}
+	return loggingTime, nil
+}
+
 func (l *LoggingTime) DeleteLoggingTime() (err error) {
 	loggingTimeId := LoggingTimeId(l.Id)
 	err = l.client.DeleteLoggingTime(l.scheduleId, loggingTimeId)

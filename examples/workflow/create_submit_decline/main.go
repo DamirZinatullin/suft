@@ -12,7 +12,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	periodId := api.PeriodId(371)
+	periodId := api.PeriodId(381)
 	schedule, err := client1.AddSchedule(periodId)
 	if err != nil {
 		log.Fatalln(err)
@@ -21,7 +21,7 @@ func main() {
 	fmt.Printf("%#v\n\n", *schedule)
 
 	loggingTime := api.AddLoggingTime{
-		CommentEmployee: "test10",
+		CommentEmployee: "test15",
 		Day1Time:        1,
 		Day2Time:        1,
 		Day3Time:        0,
@@ -30,7 +30,7 @@ func main() {
 		Day6Time:        3,
 		Day7Time:        2,
 		ProjectId:       69753,
-		Task:            "test10",
+		Task:            "test15",
 		WorkKindId:      21,
 	}
 	loggingTimeCreated, err := client1.AddLoggingTime(api.ScheduleId(schedule.Id), &loggingTime)
@@ -61,24 +61,23 @@ func main() {
 	}
 
 	//loggingTimeApproved, err := client2.ApproveLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id), "всё хорошо")
-	loggingTimeForApproveFromAdmin, err := client2.DetailLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id))
+	loggingTimeForApproveToAdmin, err := client2.DetailLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id))
 	if err != nil {
 		log.Fatalln(err)
 	}
-	loggingTimeApproved, err := loggingTimeForApproveFromAdmin.ApproveLoggingTime("всё хорошо")
+	loggingTimeDeclined, err := loggingTimeForApproveToAdmin.DeclineLoggingTime("не принято")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("Утверждённый объект трудозатрат")
-	fmt.Printf("%#v\n\n", *loggingTimeApproved)
+	fmt.Println("Отклонённый объект трудозатрат")
+	fmt.Printf("%#v\n\n", *loggingTimeDeclined)
 
-	scheduleApproved, err := client2.DetailSchedule(api.ScheduleId(scheduleForApprove.Id))
+	scheduleDeclined, err := client2.DetailSchedule(api.ScheduleId(scheduleForApprove.Id))
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Printf("Утверждённое расписание\n")
-	fmt.Printf("%#v\n", *scheduleApproved)
-
+	fmt.Printf("Отклонённое расписание\n")
+	fmt.Printf("%#v\n\n", *scheduleDeclined)
 
 	err = loggingTimeForApprove.DeleteLoggingTime()
 	if err != nil {

@@ -4,7 +4,7 @@ type StatusCode string
 
 const (
 	Approved  StatusCode = "УТВ"
-	Denied    StatusCode = "ОТКЛ"
+	Declined  StatusCode = "ОТКЛ"
 	Created   StatusCode = "СЗ"
 	ToApprove StatusCode = "НУ"
 )
@@ -31,10 +31,6 @@ type Schedule struct {
 	Id         int      `json:"id"`
 	Period     Period   `json:"period"`
 	StatusCode string   `json:"statusCode"`
-}
-
-type EditStatusSchedule struct {
-	statusCode string
 }
 
 func (s *Schedule) SubmitForApproveSchedule() (*Schedule, error) {
