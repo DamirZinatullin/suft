@@ -52,6 +52,7 @@ var fakeSchedule2 = Schedule{
 }
 
 var fakeLoggingTime1 = LoggingTime{
+	scheduleId:           777,
 	AdminEmployee:        Employee{},
 	CommentAdminEmployee: "fake comment from Admin",
 	CommentEmployee:      "fake comment from Employee",
@@ -71,6 +72,7 @@ var fakeLoggingTime1 = LoggingTime{
 }
 
 var fakeLoggingTime2 = LoggingTime{
+	scheduleId: 777,
 	AdminEmployee:        Employee{},
 	CommentAdminEmployee: "fake comment from Admin2",
 	CommentEmployee:      "fake comment from Employee2",
@@ -109,7 +111,7 @@ func TestSchedulesSuccess(t *testing.T) {
 		CreatorApprover: "fake",
 	})
 	require.NoError(t, err)
-	assert.Equal(t, []Schedule{fakeSchedule1, fakeSchedule2}, schedules)
+	assert.Equal(t, []*Schedule{&fakeSchedule1, &fakeSchedule2}, schedules)
 }
 
 func TestSchedulesUnauthorized(t *testing.T) {
@@ -244,7 +246,7 @@ func TestLoggingTimeListSuccess(t *testing.T) {
 		Size: 5,
 	})
 	require.NoError(t, err)
-	assert.Equal(t, []LoggingTime{fakeLoggingTime1, fakeLoggingTime2}, loggingTimeList)
+	assert.Equal(t, []*LoggingTime{&fakeLoggingTime1, &fakeLoggingTime2}, loggingTimeList)
 }
 
 func TestLoggingTimeListUnauthorized(t *testing.T) {
@@ -346,7 +348,9 @@ func NewFakeClient() (*Client, error) {
 }
 
 func SuccessRespSchedules() (*http.Response, error) {
-	schedules := []Schedule{fakeSchedule1, fakeSchedule2}
+	fakeSchedule1.client, _ = NewFakeClient()
+	fakeSchedule2.client, _ = NewFakeClient()
+	schedules := []*Schedule{&fakeSchedule1, &fakeSchedule2}
 	respB, _ := json.Marshal(schedules)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
@@ -368,6 +372,7 @@ func ErrorRespFromDoHttp() (*http.Response, error) {
 
 func SuccessRespAddSchedule() (*http.Response, error) {
 	scheduleReq := fakeSchedule1
+	scheduleReq.client, _ = NewFakeClient()
 	respB, _ := json.Marshal(scheduleReq)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 201,
@@ -377,6 +382,7 @@ func SuccessRespAddSchedule() (*http.Response, error) {
 
 func SuccessRespDetailSchedule() (*http.Response, error) {
 	scheduleReq := fakeSchedule1
+	scheduleReq.client, _ = NewFakeClient()
 	respB, _ := json.Marshal(scheduleReq)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
@@ -385,8 +391,10 @@ func SuccessRespDetailSchedule() (*http.Response, error) {
 }
 
 func SuccessRespLoggingTimeList() (*http.Response, error) {
-	schedules := []LoggingTime{fakeLoggingTime1, fakeLoggingTime2}
-	respB, _ := json.Marshal(schedules)
+	fakeLoggingTime1.client, _ = NewFakeClient()
+	fakeLoggingTime2.client, _ = NewFakeClient()
+	loggingTimes := []*LoggingTime{&fakeLoggingTime1, &fakeLoggingTime2}
+	respB, _ := json.Marshal(loggingTimes)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
 		Body: body}
@@ -395,6 +403,7 @@ func SuccessRespLoggingTimeList() (*http.Response, error) {
 
 func SuccessRespAddLoggingTime() (*http.Response, error) {
 	loggingTime := fakeLoggingTime1
+	loggingTime.client, _ = NewFakeClient()
 	respB, _ := json.Marshal(loggingTime)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 201,
@@ -412,6 +421,7 @@ func SuccessRespDeleteLoggingTime() (*http.Response, error) {
 
 func SuccessRespDetailLoggingTime() (*http.Response, error) {
 	loggingTime := fakeLoggingTime1
+	loggingTime.client, _ = NewFakeClient()
 	respB, _ := json.Marshal(loggingTime)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
