@@ -14,7 +14,6 @@ import (
 	"path"
 	"strings"
 	"suftsdk/internal/auth"
-	"suftsdk/internal/loggingtime"
 	"suftsdk/pkg/api"
 	"syscall"
 	"time"
@@ -602,7 +601,7 @@ func genLoggingTimeFile() (path string, err error) {
 	}
 	defer output.Close()
 	jsonEncoder := json.NewEncoder(output)
-	loggingTime := loggingtime.AddLoggingTime{
+	loggingTime := api.AddLoggingTime{
 		CommentEmployee: "",
 		Day1Time:        0,
 		Day2Time:        0,
@@ -632,7 +631,7 @@ func loggingTimeFilePath() (filePath string, err error) {
 
 }
 
-func loggingTimeFromFIle() (loggingTime *loggingtime.AddLoggingTime, err error) {
+func loggingTimeFromFIle() (loggingTime *api.AddLoggingTime, err error) {
 	path, err := loggingTimeFilePath()
 	if err != nil {
 		return nil, err
@@ -645,7 +644,7 @@ func loggingTimeFromFIle() (loggingTime *loggingtime.AddLoggingTime, err error) 
 	if err != nil {
 		log.Fatalln(err)
 	}
-	logTime := loggingtime.AddLoggingTime{}
+	logTime := api.AddLoggingTime{}
 	err = json.Unmarshal(data, &logTime)
 	return &logTime, nil
 }

@@ -1,4 +1,8 @@
-package schedule
+package api
+
+
+
+type StatusCode string
 
 const (
 	Approved  StatusCode = "УТВ"
@@ -6,8 +10,6 @@ const (
 	Created   StatusCode = "СЗ"
 	ToApprove StatusCode = "НУ"
 )
-
-type StatusCode string
 
 type EmployeeInterface interface {
 	Validate()
@@ -38,6 +40,7 @@ type Period struct {
 }
 
 type Schedule struct {
+	client     *Client
 	Author     Employee `json:"author"`
 	Id         int      `json:"id"`
 	Period     Period   `json:"period"`
@@ -46,4 +49,13 @@ type Schedule struct {
 
 type EditStatusSchedule struct {
 	statusCode string
+}
+
+func (s *Schedule)SubmitForApproveSchedule() (*Schedule, error){
+	scheduleId := ScheduleId(s.Id)
+	scheduleResp, err := s.client.SubmitForApproveSchedule(scheduleId)
+	if err != nil {
+		return nil, err
+	}
+	return scheduleResp, nil
 }

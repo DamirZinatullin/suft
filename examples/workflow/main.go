@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"suftsdk/internal/loggingtime"
 	"suftsdk/pkg/api"
 )
 
@@ -21,7 +20,7 @@ func main() {
 	fmt.Println("Добавлено расписание")
 	fmt.Printf("%#v\n\n", *schedule)
 
-	loggingTime := loggingtime.AddLoggingTime{
+	loggingTime := api.AddLoggingTime{
 		CommentEmployee: "test10",
 		Day1Time:        1,
 		Day2Time:        1,
@@ -41,7 +40,7 @@ func main() {
 	fmt.Printf("Добавлен LoggingTime:\n")
 	fmt.Printf("%#v\n\n", *loggingTimeCreated)
 
-	scheduleForApprove, err := client1.SubmitForApproveSchedule(api.ScheduleId(schedule.Id))
+	scheduleForApprove, err := schedule.SubmitForApproveSchedule()
 	if err != nil {
 		log.Fatalln(err)
 	}

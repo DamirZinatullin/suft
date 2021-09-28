@@ -1,25 +1,21 @@
-package loggingtime
+package api
 
-import (
-	"suftsdk/internal/schedule"
-)
-
-type StatusCode string
-
-const Approved StatusCode = "УТВ"
-const Denied StatusCode = "ОТКЛ"
-const Created StatusCode = "СЗ"
-const ToApprove StatusCode = "НУ"
-const ToApproveAgain StatusCode = "НП"
-const Corrected StatusCode = "СК"
+//type StatusCode string
+//
+//const Approved StatusCode = "УТВ"
+//const Denied StatusCode = "ОТКЛ"
+//const Created StatusCode = "СЗ"
+//const ToApprove StatusCode = "НУ"
+//const ToApproveAgain StatusCode = "НП"
+//const Corrected StatusCode = "СК"
 
 type TimeLoggerInterface interface {
 	Validate()
 }
 
 type LoggingTime struct {
-	AdminEmployee        schedule.Employee `json:"adminEmployee"`
-	CommentAdminEmployee string            `json:"commentAdminEmployee"`
+	AdminEmployee        Employee   `json:"adminEmployee"`
+	CommentAdminEmployee string     `json:"commentAdminEmployee"`
 	CommentEmployee      string            `json:"commentEmployee"`
 	Day1Time             float64           `json:"day1Time"`
 	Day2Time             float64           `json:"day2Time"`
@@ -30,9 +26,9 @@ type LoggingTime struct {
 	Day7Time             float64           `json:"day7Time"`
 	Id                   int               `json:"id"`
 	ImportedFrom         string            `json:"importedFrom"`
-	ProjectId            int               `json:"projectId"`
-	StatusCode           StatusCode        `json:"statusCode"`
-	Task                 string            `json:"task"`
+	ProjectId            int        `json:"projectId"`
+	StatusCode           StatusCode `json:"statusCode"`
+	Task                 string     `json:"task"`
 	WorkKindId           int               `json:"workKindId"`
 }
 
