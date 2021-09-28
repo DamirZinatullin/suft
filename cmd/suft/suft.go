@@ -436,6 +436,7 @@ func removeLoggingTime(c *cli.Context) error {
 	return nil
 }
 
+
 func approveLoggingTime(c *cli.Context) error {
 	err := clifuncs.RefreshConfig()
 	if err != nil {
@@ -452,6 +453,7 @@ func approveLoggingTime(c *cli.Context) error {
 		return err
 	}
 	loggingTimeJSON, err := json.Marshal(loggingTime)
+
 	if err != nil {
 		return err
 	}

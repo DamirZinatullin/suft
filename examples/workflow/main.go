@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"suftsdk/internal/loggingtime"
 	"suftsdk/pkg/api"
 )
 
@@ -21,7 +20,7 @@ func main() {
 	fmt.Println("Добавлено расписание")
 	fmt.Printf("%#v\n\n", *schedule)
 
-	loggingTime := loggingtime.AddLoggingTime{
+	loggingTime := api.AddLoggingTime{
 		CommentEmployee: "test10",
 		Day1Time:        1,
 		Day2Time:        1,
@@ -41,7 +40,8 @@ func main() {
 	fmt.Printf("Добавлен LoggingTime:\n")
 	fmt.Printf("%#v\n\n", *loggingTimeCreated)
 
-	scheduleForApprove, err := client1.SubmitForApproveSchedule(api.ScheduleId(schedule.Id))
+	//scheduleForApprove, err := client1.SubmitForApproveSchedule(api.ScheduleId(schedule.Id))
+	scheduleForApprove, err := schedule.SubmitForApproveSchedule()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -60,7 +60,12 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	loggingTimeApproved, err := client2.ApproveLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id), "всё хорошо")
+	//loggingTimeApproved, err := client2.ApproveLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id), "всё хорошо")
+	loggingTimeForApproveFromAdmin, err := client2.DetailLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated.Id))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	loggingTimeApproved, err := loggingTimeForApproveFromAdmin.ApproveLoggingTime("всё хорошо")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -73,4 +78,12 @@ func main() {
 	}
 	fmt.Printf("Утверждённое расписание\n")
 	fmt.Printf("%#v\n", *scheduleApproved)
+
+
+	err = loggingTimeForApprove.DeleteLoggingTime()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Printf("Трудозатрата удалена\n")
+
 }

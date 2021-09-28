@@ -29,4 +29,14 @@ func main() {
 	for _, schedule := range schedules {
 		fmt.Printf("%#v\n", schedule)
 	}
+
+	fmt.Printf("\nСписок расписаний при передаче опций после отправки на утверждение\n")
+	for _, schedule := range schedules {
+		scheduleResp, err := schedule.SubmitForApproveSchedule()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Printf("%#v\n", scheduleResp)
+	}
+
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"suftsdk/internal/loggingtime"
 	"suftsdk/pkg/api"
 )
 
@@ -13,7 +12,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	addLT := loggingtime.AddLoggingTime{
+	addLT := api.AddLoggingTime{
 		CommentEmployee: "hi",
 		Day1Time:        1,
 		Day2Time:        1,
