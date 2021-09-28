@@ -28,6 +28,9 @@ type userConfig struct {
 	DateRefresh time.Time  `json:"date_refresh"`
 }
 
+const scheduleCategory string = "Расписания"
+const loggingTimeCategory string = "Временные затраты"
+
 const configFileName string = "suft_config.json"
 const configDirName string = "suft"
 const loggingTimeFileName string = "logging_time.json"
@@ -83,7 +86,6 @@ func main() {
 			Name:     "login",
 			Usage:    "Аутентификация клиента",
 			Category: "Клиент",
-			Aliases:  []string{"ln"},
 			Action: func(c *cli.Context) error {
 				err := loginSuft()
 				if err != nil {
@@ -96,7 +98,6 @@ func main() {
 			Name:     "logout",
 			Usage:    "Выход из клиента",
 			Category: "Клиент",
-			Aliases:  []string{"lt"},
 			Action: func(c *cli.Context) error {
 				err := logoutSuft()
 				if err != nil {
@@ -108,7 +109,7 @@ func main() {
 		{
 			Name:     "schedules",
 			Usage:    "Список расписаний",
-			Category: "Расписания",
+			Category: scheduleCategory,
 			Aliases:  []string{"scs"},
 			Flags: []cli.Flag{
 				pageFlag,
@@ -157,7 +158,7 @@ func main() {
 			Name:     "schedule",
 			Usage:    "Детализация расписания",
 			Aliases:  []string{"sc"},
-			Category: "Расписания",
+			Category: scheduleCategory,
 			Flags: []cli.Flag{
 				scheduleIdFlag,
 			},
@@ -188,8 +189,8 @@ func main() {
 			Name:        "add-schedule",
 			Usage:       "Добавление расписания",
 			Description: "Для добавления расписания необходимо передать id периуда",
-			Category:    "Расписания",
-			Aliases:     []string{"addsc"},
+			Category:    scheduleCategory,
+			Aliases:     []string{"as"},
 			Flags: []cli.Flag{
 				periodFlag,
 			},
@@ -221,7 +222,7 @@ func main() {
 			Name:     "submit-for-approve",
 			Usage:    "Отправить расписание на утверждение",
 			Aliases:  []string{"s"},
-			Category: "Расписания",
+			Category: scheduleCategory,
 			Flags: []cli.Flag{
 				scheduleIdFlag,
 			},
@@ -258,7 +259,7 @@ func main() {
 				pageFlag,
 				sizeFlag,
 			},
-			Category: "Временные затраты",
+			Category: loggingTimeCategory,
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
 				if err != nil {
@@ -298,7 +299,7 @@ func main() {
 				scheduleIdFlag,
 				loggingTimeIdFlag,
 			},
-			Category: "Временные затраты",
+			Category: loggingTimeCategory,
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
 				if err != nil {
@@ -324,8 +325,8 @@ func main() {
 		{
 			Name:     "add-logging-time",
 			Usage:    "Добавление временной затраты",
-			Category: "Временные затраты",
-			Aliases:  []string{"addlt"},
+			Category: loggingTimeCategory,
+			Aliases:  []string{"al"},
 			Flags: []cli.Flag{
 				scheduleIdFlag,
 				cli.StringFlag{
@@ -370,7 +371,7 @@ func main() {
 		{
 			Name:     "remove-logging-time",
 			Usage:    "Удаление временной затраты",
-			Category: "Временные затраты",
+			Category: loggingTimeCategory,
 			Aliases:  []string{"rmlt"},
 			Flags: []cli.Flag{
 				scheduleIdFlag,
@@ -408,7 +409,7 @@ func main() {
 					Destination: &adminComment,
 				},
 			},
-			Category: "Временные затраты",
+			Category: loggingTimeCategory,
 			Action: func(c *cli.Context) error {
 				err := refreshConfig()
 				if err != nil {
