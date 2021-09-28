@@ -76,7 +76,7 @@ type Client struct {
 
 func NewClient(email string, password string, options *OptionsNC) (API, error) {
 	baseURL := BaseURL
-	httpTimeout := time.Minute
+	httpTimeout := 2 * time.Second
 	if options != nil {
 		if options.SuftAPIURL != "" {
 			baseURL = options.SuftAPIURL
@@ -86,7 +86,12 @@ func NewClient(email string, password string, options *OptionsNC) (API, error) {
 		}
 	}
 
-	token, err := auth.Authenticate(email, password)
+	authOptions := auth.Options{
+		SuftAPIURL:  baseURL,
+		HttpTimeout: httpTimeout,
+	}
+
+	token, err := auth.Authenticate(email, password, &authOptions)
 	if err != nil {
 		return nil, err
 	}
