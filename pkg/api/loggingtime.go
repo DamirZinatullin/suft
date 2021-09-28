@@ -1,9 +1,5 @@
 package api
 
-type TimeLoggerInterface interface {
-	Validate()
-}
-
 type LoggingTime struct {
 	scheduleId           ScheduleId
 	client               *Client
@@ -39,7 +35,7 @@ type AddLoggingTime struct {
 	WorkKindId      int     `json:"workKindId"`
 }
 
-func (l *LoggingTime) ApproveLoggingTime(comment string)(*LoggingTime, error) {
+func (l *LoggingTime) ApproveLoggingTime(comment string) (*LoggingTime, error) {
 	loggingTimeId := LoggingTimeId(l.Id)
 	loggingTime, err := l.client.ApproveLoggingTime(l.scheduleId, loggingTimeId, comment)
 	if err != nil {
@@ -48,7 +44,7 @@ func (l *LoggingTime) ApproveLoggingTime(comment string)(*LoggingTime, error) {
 	return loggingTime, nil
 }
 
-func (l *LoggingTime) DeleteLoggingTime()(err error) {
+func (l *LoggingTime) DeleteLoggingTime() (err error) {
 	loggingTimeId := LoggingTimeId(l.Id)
 	err = l.client.DeleteLoggingTime(l.scheduleId, loggingTimeId)
 	if err != nil {
@@ -56,4 +52,3 @@ func (l *LoggingTime) DeleteLoggingTime()(err error) {
 	}
 	return nil
 }
-

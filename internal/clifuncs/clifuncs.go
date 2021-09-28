@@ -14,9 +14,8 @@ import (
 	"path"
 	"strings"
 	"suftsdk/internal/auth"
-	"syscall"
-
 	"suftsdk/pkg/api"
+	"syscall"
 	"time"
 )
 
@@ -173,7 +172,6 @@ func configExists() (bool, error) {
 		return false, err
 	}
 	return true, nil
-
 }
 
 func GenLoggingTimeFile() (path string, err error) {
