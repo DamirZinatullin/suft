@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/urfave/cli"
 	"log"
 	"os"
 	"os/exec"
 	"suftsdk/internal/clifuncs"
 	"suftsdk/pkg/api"
+
+	"github.com/urfave/cli"
 )
 
 const scheduleCategory string = "Расписания"
@@ -256,9 +257,7 @@ func schedules(c *cli.Context) error {
 	if size != 0 {
 		options.Size = size
 	}
-	if page != 0 {
-		options.Page = page
-	}
+	options.Page = page
 	if role != "" {
 		clientRole := api.Role(role)
 		options.CreatorApprover = clientRole
@@ -348,9 +347,7 @@ func loggingTimes(c *cli.Context) error {
 	if size != 0 {
 		options.Size = size
 	}
-	if page != 0 {
-		options.Page = page
-	}
+	options.Page = page
 	scheduleId := api.ScheduleId(scheduleId)
 	loggingTimeList, err := client.LoggingTimeList(scheduleId, &options)
 	if err != nil {
