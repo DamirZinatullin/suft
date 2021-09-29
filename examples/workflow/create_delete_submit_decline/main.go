@@ -115,7 +115,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// получаем объект logging-time и утверждаем его. Выводим на экран
+	// получаем объект logging-time и отклоняем его. Выводим на экран
 	loggingTimeForApproveToAdmin, err := client2.DetailLoggingTime(api.ScheduleId(scheduleForApprove.Id), api.LoggingTimeId(loggingTimeCreated1.Id))
 	if err != nil {
 		log.Fatalln(err)
