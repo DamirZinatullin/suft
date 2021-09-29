@@ -94,6 +94,7 @@ type deleteLoggingTimeFunc func() error
 type submitForApproveScheduleFunc func() (*api.Schedule, error)
 type approveLoggingTimeFunc func() (*api.LoggingTime, error)
 type declineLoggingTimeFunc func() (*api.LoggingTime, error)
+type addLoggingTimeFunc func() (*api.LoggingTime, error)
 
 var respSchedules schedulesFunc
 var respScheduleDetail scheduleDetailFunc
@@ -104,6 +105,7 @@ var respDeleteLoggingTime deleteLoggingTimeFunc
 var respSubmitForApproveSchedule submitForApproveScheduleFunc
 var respApproveLoggingTime approveLoggingTimeFunc
 var respDeclineLoggingTime declineLoggingTimeFunc
+var respAddLoggingTime addLoggingTimeFunc
 
 var exitIndicator string
 
@@ -362,6 +364,32 @@ func TestCliFunc(t *testing.T) {
 		assert.Equal(t, "1", exitIndicator)
 		exitIndicator = ""
 	})
+	t.Run("Успешный вызов AddLoggingTime", func(t *testing.T) {
+		args := []string{"", "al", "-scid", "777"}
+		respAddLoggingTime = SuccessRespAddLoggingTime
+		err = app.Run(args)
+		//Тест не может записать в открытый файл и выпадает ошибка
+		require.Error(t, err)
+		assert.Equal(t, "1", exitIndicator)
+		exitIndicator = ""
+	})
+	t.Run("Ошибка при вызове метода AddLoggingTime", func(t *testing.T) {
+		args := []string{"", "al", "-scid", "777"}
+		respAddLoggingTime = ErrorRespAddLoggingTime
+		//Тест не может записать в открытый файл и выпадает ошибка
+		err = app.Run(args)
+		require.Error(t, err)
+		assert.Equal(t, "1", exitIndicator)
+		exitIndicator = ""
+	})
+	t.Run("Передача невалидного флага в AddLoggingTime", func(t *testing.T) {
+		args := []string{"", "al", "-scid", "ар"}
+		respAddLoggingTime = SuccessRespAddLoggingTime
+		err = app.Run(args)
+		require.Error(t, err)
+		assert.Equal(t, "", exitIndicator)
+		exitIndicator = ""
+	})
 
 }
 
@@ -391,7 +419,7 @@ func (f *fakeClient) LoggingTimeList(scheduleId api.ScheduleId, options *api.Opt
 }
 
 func (f *fakeClient) AddLoggingTime(scheduleId api.ScheduleId, loggingTime *api.AddLoggingTime) (*api.LoggingTime, error) {
-	panic("implement me")
+	return respAddLoggingTime()
 }
 
 func (f *fakeClient) DetailLoggingTime(scheduleId api.ScheduleId, loggingTimeId api.LoggingTimeId) (*api.LoggingTime, error) {
@@ -485,4 +513,12 @@ func SuccessRespDeclineLoggingTime() (*api.LoggingTime, error) {
 
 func ErrorRespDeclineLoggingTime() (*api.LoggingTime, error) {
 	return nil, errors.New("error from DeclineLoggingTime method")
+}
+
+func SuccessRespAddLoggingTime() (*api.LoggingTime, error) {
+	return &fakeLoggingTime1, nil
+}
+
+func ErrorRespAddLoggingTime() (*api.LoggingTime, error) {
+	return nil, errors.New("error from AddLoggingTime method")
 }
