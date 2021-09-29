@@ -86,11 +86,14 @@ var fakeLoggingTime2 = api.LoggingTime{
 }
 
 type schedulesFunc func() ([]*api.Schedule, error)
+type scheduleDetailFunc func() (*api.Schedule, error)
 
-var respFuncSchedules schedulesFunc
+var respSchedules schedulesFunc
+var respScheduleDetail scheduleDetailFunc
+
 var exitIndicator string
 
-func TestCliFuncSchedules(t *testing.T) {
+func TestCliFunc(t *testing.T) {
 	clientConstructor = fakeClientInit{}
 	app, err := cliFunc()
 	require.NoError(t, err)
@@ -99,26 +102,58 @@ func TestCliFuncSchedules(t *testing.T) {
 	}
 	t.Run("Успешный вызов Schedules", func(t *testing.T){
 		args := []string{"", "scs"}
-		respFuncSchedules = SuccessRespSchedules
+		respSchedules = SuccessRespSchedules
 		err = app.Run(args)
 		require.NoError(t, err)
 		assert.Equal(t, "", exitIndicator)
 	})
 	t.Run("Вызов Schedules с лишним аргументом", func(t *testing.T){
 		args := []string{"", "scs", "fake"}
-		respFuncSchedules = SuccessRespSchedules
+		respSchedules = SuccessRespSchedules
 		err = app.Run(args)
 		require.NoError(t, err)
 		assert.Equal(t, "", exitIndicator)
 	})
 	t.Run("Ошибка при вызове метода Schedules", func(t *testing.T){
 		args := []string{"", "scs"}
-		respFuncSchedules = ErrorRespSchedules
+		respSchedules = ErrorRespSchedules
 		err = app.Run(args)
 		require.Error(t, err)
 		assert.Equal(t, "1", exitIndicator)
+		exitIndicator = ""
 	})
-
+	t.Run("Успешный вызов ScheduleDetail", func(t *testing.T){
+		args := []string{"", "sc", "-scid" ,"777"}
+		respScheduleDetail = SuccessRespScheduleDetail
+		err = app.Run(args)
+		require.NoError(t, err)
+		assert.Equal(t, "", exitIndicator)
+		exitIndicator = ""
+	})
+	t.Run("Ошибка при вызове метода ScheduleDetail", func(t *testing.T){
+		args := []string{"", "sc", "-scid", "777"}
+		respScheduleDetail = ErrorRespDetailSchedule
+		err = app.Run(args)
+		require.Error(t, err)
+		assert.Equal(t, "1", exitIndicator)
+		exitIndicator = ""
+	})
+	t.Run("Передача невалидного флага в ScheduleDetail", func(t *testing.T){
+		args := []string{"", "sc", "-scid" ,"ар"}
+		respScheduleDetail = SuccessRespScheduleDetail
+		err = app.Run(args)
+		require.Error(t, err)
+		assert.Equal(t, "", exitIndicator)
+		exitIndicator = ""
+	})
+	t.Run("Передача неправильного флага в ScheduleDetail", func(t *testing.T){
+		args := []string{"", "sc", "-fake" ,"777"}
+		respScheduleDetail = SuccessRespScheduleDetail
+		err = app.Run(args)
+		require.Error(t, err)
+		assert.Equal(t, "", exitIndicator)
+		exitIndicator = ""
+	})
 }
 
 type fakeClientInit struct{}
@@ -131,7 +166,7 @@ type fakeClient struct {
 }
 
 func (f *fakeClient) Schedules(options *api.OptionsS) ([]*api.Schedule, error) {
-	return respFuncSchedules()
+	return respSchedules()
 }
 
 func (f *fakeClient) AddSchedule(periodId api.PeriodId) (*api.Schedule, error) {
@@ -139,7 +174,7 @@ func (f *fakeClient) AddSchedule(periodId api.PeriodId) (*api.Schedule, error) {
 }
 
 func (f *fakeClient) DetailSchedule(scheduleId api.ScheduleId) (*api.Schedule, error) {
-	panic("implement me")
+	return respScheduleDetail()
 }
 
 func (f *fakeClient) LoggingTimeList(scheduleId api.ScheduleId, options *api.OptionsLT) ([]*api.LoggingTime, error) {
@@ -176,4 +211,12 @@ func SuccessRespSchedules() ([]*api.Schedule, error) {
 
 func ErrorRespSchedules() ([]*api.Schedule, error) {
 	return nil, errors.New("error from schedules method")
+}
+
+func SuccessRespScheduleDetail() (*api.Schedule, error) {
+	return &fakeSchedule1, nil
+}
+
+func ErrorRespDetailSchedule() (*api.Schedule, error) {
+	return nil, errors.New("error from scheduleDetail method")
 }
