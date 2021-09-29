@@ -106,21 +106,6 @@ func NewClient(email string, password string, options *OptionsNC) (API, error) {
 }
 
 func (c *Client) Schedules(options *OptionsS) ([]*Schedule, error) {
-	// если хочешь, можем досконально изучить пакет url и сделать элегантно,
-	// однако на данном этапе предлагаю сделать наиболее доступным, простым и рабочим способом,
-	// как я сделал ниже, а потом, если останется время, то переделаем с использованием пакета url.
-	// reqURL, err := url.Parse(SchedulesURN)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// queryString := reqURL.Query()
-	// queryString.Set("creatorApprover", "creator")
-	// reqURL.RawQuery = queryString.Encode()
-	// base, err := url.Parse(BaseURL)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// reqURL = base.ResolveReference(reqURL)
 	page := 0
 	size := 5
 	creatorApprover := Creator
@@ -324,35 +309,6 @@ func (c *Client) DetailLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingT
 	return &loggingTime, nil
 }
 
-// func (c *Client) EditLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId, loggingTime *loggingtime.EditLoggingTime) (*loggingtime.LoggingTime, error) {
-// 	reqB, err := json.Marshal(loggingTime)
-// 	if err != nil {
-// 		log.Println("EditLoggingTime: unable to marshal request body:", err)
-// 		return nil, err
-// 	}
-// 	URN := fmt.Sprintf("%s/%d/%s/%d", SchedulesURN, scheduleId, LoggingTimeURN, loggingTimeId)
-// 	resp, err := c.doHTTP(http.MethodPatch, URN, reqB)
-// 	if err != nil {
-// 		log.Println("EditLoggingTime: doHTTP:", err)
-// 		return nil, err
-// 	}
-// 	defer resp.Body.Close()
-// 	respB, err := io.ReadAll(resp.Body)
-// 	if err != nil {
-// 		log.Println("EditLoggingTime: unable to read response body:", err)
-// 		return nil, err
-// 	}
-// 	if resp.StatusCode != http.StatusOK {
-// 		return nil, errors.New(string(respB))
-// 	}
-// 	loggingTimeResp := loggingtime.LoggingTime{}
-// 	err = json.Unmarshal(respB, &loggingTimeResp)
-// 	if err != nil {
-// 		log.Println("EditLoggingTime: unable to unmarshal response body:", err)
-// 		return nil, err
-// 	}
-// 	return &loggingTimeResp, nil
-// }
 
 func (c *Client) DeleteLoggingTime(scheduleId ScheduleId, loggingTimeId LoggingTimeId) error {
 	URN := fmt.Sprintf("%s/%d/%s/%d", SchedulesURN, scheduleId, LoggingTimeURN, loggingTimeId)
