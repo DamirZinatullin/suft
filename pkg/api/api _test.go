@@ -322,7 +322,7 @@ func TestDetailLoggingTimeSuccess(t *testing.T) {
 	GetRequireResp = SuccessRespDetailLoggingTime
 	loggingTimeResp, err := client.DetailLoggingTime(777, 777)
 	require.NoError(t, err)
-	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
+	assert.Equal(t, expected, loggingTimeResp)
 }
 
 func TestDetailLoggingTimeUnauthorized(t *testing.T) {
