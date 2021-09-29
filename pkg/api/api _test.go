@@ -72,7 +72,7 @@ var fakeLoggingTime1 = LoggingTime{
 }
 
 var fakeLoggingTime2 = LoggingTime{
-	scheduleId: 777,
+	scheduleId:           777,
 	AdminEmployee:        Employee{},
 	CommentAdminEmployee: "fake comment from Admin2",
 	CommentEmployee:      "fake comment from Employee2",
@@ -141,10 +141,12 @@ func TestAddScheduleSuccess(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	expected := &fakeSchedule1
+	expected.client = client
 	GetRequireResp = SuccessRespAddSchedule
 	schedule, err := client.AddSchedule(5)
 	require.NoError(t, err)
-	assert.Equal(t, &fakeSchedule1, schedule)
+	assert.Equal(t, expected, schedule)
 }
 
 func TestAddScheduleUnauthorized(t *testing.T) {
@@ -174,10 +176,12 @@ func TestDetailScheduleSuccess(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	expected := &fakeSchedule1
+	expected.client = client
 	GetRequireResp = SuccessRespDetailSchedule
 	schedule, err := client.DetailSchedule(777)
 	require.NoError(t, err)
-	assert.Equal(t, &fakeSchedule1, schedule)
+	assert.Equal(t, expected, schedule)
 }
 
 func TestDetailScheduleUnauthorized(t *testing.T) {
@@ -207,10 +211,12 @@ func TestSubmitForApproveScheduleSuccess(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	expected := &fakeSchedule1
+	expected.client = client
 	GetRequireResp = SuccessRespDetailSchedule
 	scheduleResp, err := client.SubmitForApproveSchedule(777)
 	require.NoError(t, err)
-	assert.Equal(t, &fakeSchedule1, scheduleResp)
+	assert.Equal(t, expected, scheduleResp)
 }
 
 func TestSubmitForApproveScheduleUnauthorized(t *testing.T) {
@@ -276,6 +282,8 @@ func TestAddLoggingTimeSuccess(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	expected := &fakeLoggingTime1
+	expected.client = client
 	GetRequireResp = SuccessRespAddLoggingTime
 	loggingTimeResp, err := client.AddLoggingTime(777, &AddLoggingTime{})
 	require.NoError(t, err)
@@ -309,6 +317,8 @@ func TestDetailLoggingTimeSuccess(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	expected := &fakeLoggingTime1
+	expected.client = client
 	GetRequireResp = SuccessRespDetailLoggingTime
 	loggingTimeResp, err := client.DetailLoggingTime(777, 777)
 	require.NoError(t, err)
@@ -372,7 +382,7 @@ func ErrorRespFromDoHttp() (*http.Response, error) {
 
 func SuccessRespAddSchedule() (*http.Response, error) {
 	scheduleReq := fakeSchedule1
-	scheduleReq.client, _ = NewFakeClient()
+	// scheduleReq.client, _ = NewFakeClient()
 	respB, _ := json.Marshal(scheduleReq)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 201,
@@ -382,7 +392,7 @@ func SuccessRespAddSchedule() (*http.Response, error) {
 
 func SuccessRespDetailSchedule() (*http.Response, error) {
 	scheduleReq := fakeSchedule1
-	scheduleReq.client, _ = NewFakeClient()
+	// scheduleReq.client, _ = NewFakeClient()
 	respB, _ := json.Marshal(scheduleReq)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
@@ -403,7 +413,7 @@ func SuccessRespLoggingTimeList() (*http.Response, error) {
 
 func SuccessRespAddLoggingTime() (*http.Response, error) {
 	loggingTime := fakeLoggingTime1
-	loggingTime.client, _ = NewFakeClient()
+	// loggingTime.client, _ = NewFakeClient()
 	respB, _ := json.Marshal(loggingTime)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 201,
@@ -421,7 +431,7 @@ func SuccessRespDeleteLoggingTime() (*http.Response, error) {
 
 func SuccessRespDetailLoggingTime() (*http.Response, error) {
 	loggingTime := fakeLoggingTime1
-	loggingTime.client, _ = NewFakeClient()
+	// loggingTime.client, _ = NewFakeClient()
 	respB, _ := json.Marshal(loggingTime)
 	body := ioutil.NopCloser(bytes.NewReader(respB))
 	resp := http.Response{StatusCode: 200,
@@ -491,4 +501,74 @@ func TestDeleteLoggingTimeError(t *testing.T) {
 	GetRequireResp = ErrorRespFromDoHttp
 	err = client.DeleteLoggingTime(777, 777)
 	require.Error(t, err)
+}
+
+func TestApproveLoggingTimeSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	expected := &fakeLoggingTime1
+	expected.client = client
+	GetRequireResp = SuccessRespDetailLoggingTime
+	loggingTimeResp, err := client.ApproveLoggingTime(777, 777, "ok")
+	require.NoError(t, err)
+	assert.Equal(t, expected, loggingTimeResp)
+}
+
+func TestApproveLoggingTimeUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	loggingTimeResp, err := client.ApproveLoggingTime(5, 777, "ok")
+	assert.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
+
+func TestApproveLoggingTimeError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	loggingTimeResp, err := client.ApproveLoggingTime(5, 777, "ok")
+	require.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
+
+func TestDeclineLoggingTimeSuccess(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	expected := &fakeLoggingTime1
+	expected.client = client
+	GetRequireResp = SuccessRespDetailLoggingTime
+	loggingTimeResp, err := client.DeclineLoggingTime(777, 777, "fail")
+	require.NoError(t, err)
+	assert.Equal(t, expected, loggingTimeResp)
+}
+
+func TestDeclineLoggingTimeUnauthorized(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = UnauthorizedResp
+	loggingTimeResp, err := client.DeclineLoggingTime(5, 777, "fail")
+	assert.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
+}
+
+func TestDeclineLoggingTimeError(t *testing.T) {
+	client, err := NewFakeClient()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	GetRequireResp = ErrorRespFromDoHttp
+	loggingTimeResp, err := client.DeclineLoggingTime(5, 777, "fail")
+	require.Error(t, err)
+	assert.Nil(t, loggingTimeResp)
 }
