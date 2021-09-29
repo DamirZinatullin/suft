@@ -76,8 +76,23 @@ var commentFlag cli.Flag = cli.StringFlag{
 	Destination: &adminComment,
 }
 
+var clientConstructor clifuncs.ClientBuilder
+
 func main() {
-	app := cli.NewApp()
+	clientConstructor = &clifuncs.ClientInit{}
+	app, err := cliFunc()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = app.Run(os.Args)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+}
+
+func cliFunc() (app *cli.App, err error) {
+	app = cli.NewApp()
 	app.Name = "SUFT CLI"
 	app.Usage = "CLI предоставляет возможность взаимодействия с api СУФТ (системы учета фактических трудозатрат)"
 	app.Commands = []cli.Command{
@@ -211,10 +226,11 @@ func main() {
 			Action:   declineLoggingTime,
 		},
 	}
-	err := app.Run(os.Args)
+
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+	return app, nil
 }
 
 func login(c *cli.Context) error {
@@ -236,14 +252,6 @@ func logout(c *cli.Context) error {
 }
 
 func schedules(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
-	if err != nil {
-		return err
-	}
 	options := api.OptionsS{}
 	if size != 0 {
 		options.Size = size
@@ -254,6 +262,10 @@ func schedules(c *cli.Context) error {
 	if role != "" {
 		clientRole := api.Role(role)
 		options.CreatorApprover = clientRole
+	}
+	client, err := clientConstructor.NewClient()
+	if err != nil {
+		return err
 	}
 	schedules, err := client.Schedules(&options)
 	if err != nil {
@@ -271,11 +283,7 @@ func schedules(c *cli.Context) error {
 }
 
 func scheduleDetail(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}
@@ -294,11 +302,7 @@ func scheduleDetail(c *cli.Context) error {
 }
 
 func addSchedule(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}
@@ -317,11 +321,7 @@ func addSchedule(c *cli.Context) error {
 }
 
 func submitForApprove(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}
@@ -340,11 +340,7 @@ func submitForApprove(c *cli.Context) error {
 }
 
 func loggingTimes(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}
@@ -371,11 +367,7 @@ func loggingTimes(c *cli.Context) error {
 }
 
 func loggingTimeDetail(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}
@@ -394,11 +386,7 @@ func loggingTimeDetail(c *cli.Context) error {
 }
 
 func addLoggingTime(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}
@@ -431,11 +419,7 @@ func addLoggingTime(c *cli.Context) error {
 }
 
 func removeLoggingTime(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}
@@ -449,13 +433,8 @@ func removeLoggingTime(c *cli.Context) error {
 	return nil
 }
 
-
 func approveLoggingTime(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}
@@ -475,11 +454,7 @@ func approveLoggingTime(c *cli.Context) error {
 }
 
 func declineLoggingTime(c *cli.Context) error {
-	err := clifuncs.RefreshConfig()
-	if err != nil {
-		return err
-	}
-	client, err := clifuncs.NewClientFromConfig()
+	client, err := clientConstructor.NewClient()
 	if err != nil {
 		return err
 	}

@@ -23,9 +23,27 @@ const configFileName string = "suft_config.json"
 const configDirName string = "suft"
 const loggingTimeFileName string = "logging_time.json"
 
+type ClientBuilder interface {
+	NewClient() (client api.API, err error)
+}
+
 type userConfig struct {
 	Token       auth.Token
 	DateRefresh time.Time
+}
+
+type ClientInit struct{}
+
+func (c *ClientInit) NewClient() (client api.API, err error) {
+	err = RefreshConfig()
+	if err != nil {
+		return nil, err
+	}
+	client, err = NewClientFromConfig()
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 func NewClientFromConfig() (client api.API, err error) {
