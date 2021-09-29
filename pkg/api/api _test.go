@@ -287,7 +287,7 @@ func TestAddLoggingTimeSuccess(t *testing.T) {
 	GetRequireResp = SuccessRespAddLoggingTime
 	loggingTimeResp, err := client.AddLoggingTime(777, &AddLoggingTime{})
 	require.NoError(t, err)
-	assert.Equal(t, &fakeLoggingTime1, loggingTimeResp)
+	assert.Equal(t, expected, loggingTimeResp)
 }
 
 func TestAddLoggingTimeUnauthorized(t *testing.T) {
